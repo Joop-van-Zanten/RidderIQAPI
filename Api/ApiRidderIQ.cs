@@ -136,16 +136,36 @@ namespace RidderIQAPI.Api
 
 			Dictionary<string, object> parameters = new Dictionary<string, object>();
 
-			foreach (var jsonParameter in jsonParameters)
+			if (jsonParameters != null && jsonParameters.Count > 0)
 			{
-				if (string.Equals(jsonParameter.Type, "int", StringComparison.InvariantCultureIgnoreCase))
-					parameters.Add(jsonParameter.Key, Convert.ToInt32(jsonParameter.Value));
-				else if (string.Equals(jsonParameter.Type, "double", StringComparison.InvariantCultureIgnoreCase))
-					parameters.Add(jsonParameter.Key, Convert.ToDouble(jsonParameter.Value));
-				else if (string.Equals(jsonParameter.Type, "long", StringComparison.InvariantCultureIgnoreCase))
-					parameters.Add(jsonParameter.Key, Convert.ToInt64(jsonParameter.Value));
-				else
-					parameters.Add(jsonParameter.Key, jsonParameter.Value.ToString().Trim());
+				foreach (RidderWorkFlowEventParameter jsonParameter in jsonParameters)
+				{
+					switch (jsonParameter.Type)
+					{
+						case RidderWorkflowParamaterType.String:
+							parameters.Add(jsonParameter.Key, jsonParameter.Value.ToString().Trim());
+							break;
+
+						case RidderWorkflowParamaterType.Int:
+							parameters.Add(jsonParameter.Key, Convert.ToInt32(jsonParameter.Value));
+							break;
+
+						case RidderWorkflowParamaterType.Double:
+							parameters.Add(jsonParameter.Key, Convert.ToDouble(jsonParameter.Value));
+							break;
+
+						case RidderWorkflowParamaterType.Long:
+							parameters.Add(jsonParameter.Key, Convert.ToInt64(jsonParameter.Value));
+							break;
+
+						case RidderWorkflowParamaterType.DateTime:
+							parameters.Add(jsonParameter.Key, Convert.ToDateTime(jsonParameter.Value));
+							break;
+
+						default:
+							throw new NotImplementedException($"Type {jsonParameter.Type} is currently not implemented");
+					}
+				}
 			}
 
 			try
@@ -168,7 +188,7 @@ namespace RidderIQAPI.Api
 			}
 		}
 
-		public static List<Dictionary<string, object>> RecordsGetWorkflows(
+		public static List<RidderWorflowVisibility> RecordsGetWorkflows(
 			Collection<CookieHeaderValue> cookies,
 			string table,
 			string recordID
@@ -176,59 +196,102 @@ namespace RidderIQAPI.Api
 		{
 			// Get the SDK Client
 			RidderIQSDK sdk = GetClient(cookies, true);
+
+			// Load the table record
+			SDKRecordset tableRecord = sdk.CreateRecordset(
+				$"{table}",
+				null,
+				$"PK_{table} = '{recordID}'",
+				null
+			);
+			tableRecord.MoveFirst();
+			// Get the current workflowstate of the table record
+			var tableRecordWorkflowState = tableRecord.GetField<Guid>("FK_WORKFLOWSTATE");
+
 			// Find the table
-			SDKRecordset records = sdk.CreateRecordset(
+			SDKRecordset tableInfo = sdk.CreateRecordset(
 				"M_TABLEINFO",
 				null,
 				$"TABLENAME = '{table}' AND FK_WORKFLOWMODEL IS NOT NULL",
 				null
 			);
 			// Check if any records are found
-			if (records.RecordCount == 0)
+			if (tableInfo.RecordCount == 0)
 				throw new KeyNotFoundException();
 			// Move the pointer to the start
-			records.MoveFirst();
+			tableInfo.MoveFirst();
 			// Get the workflow model
-			Guid workflowModel = (Guid)records.GetField("FK_WORKFLOWMODEL").Value;
-			records = sdk.CreateRecordset(
+			Guid workflowModelID = tableInfo.GetField<Guid>("FK_WORKFLOWMODEL");
+
+			SDKRecordset workflowEvents = sdk.CreateRecordset(
 				"M_WORKFLOWEVENT",
 				null,
-				$"FK_WORKFLOWMODEL = '{workflowModel}' AND (ACTIONNAME IS NULL OR ACTIONNAME = '') AND TYPE == 1",
-				null
+				$"FK_WORKFLOWMODEL = '{workflowModelID}' AND TYPE != 3",
+				"SEQUENCENUMBER, NAME"
 			);
 			// Check if any records are found
-			if (records.RecordCount == 0)
+			if (workflowEvents.RecordCount == 0)
 				throw new KeyNotFoundException();
-			// Move the pointer to the start
-			records.MoveFirst();
-			List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
 
-			object id = Guid.TryParse(recordID, out Guid guid) ? guid : (object)Convert.ToInt32(recordID);
-			while (!records.EOF)
+			List<RidderWorflowVisibility> result = new List<RidderWorflowVisibility>();
+			foreach (SDKRecordset item in workflowEvents.AsEnumerable())
 			{
-				bool add = true;
-				var userAvailabilityValue = records.GetField("USERAVAILABILITY").Value;
+				var hasPermission = CheckPermissionsWorkflows(
+					cookies,
+					new Models.RidderPermission.WorkflowReqeust(
+						(RidderDesignerScope)item.GetField<int>("SCOPE"),
+						item.GetField<Guid>("PK_M_WORKFLOWEVENT")
+					)
+				).First().Result;
+				if (!hasPermission)
+					continue;
 
-				if (userAvailabilityValue != DBNull.Value)
-				{
-					var userAvailability = (byte[])records.GetField("USERAVAILABILITY").Value;
+				var wfScope = (RidderDesignerScope)item.GetField<int>("SCOPE");
+				var wfEvent = item.GetField<Guid>("PK_M_WORKFLOWEVENT");
 
-					var calResult = sdk.GetCalculatedColumnOutput(userAvailability, table, id);
-					if (calResult is bool b)
-					{
-						add = b;
-					}
-				}
+				RidderWorflowVisibility add = new RidderWorflowVisibility();
+				add.Event = wfEvent;
+				add.Scope = wfScope;
+				add.Name = item.GetField<string>("NAME"); ;
+				add.Action = item.GetField<string>("ACTIONNAME");
+				add.Caption = item.GetField<string>("CAPTION");
+				add.SequenceNumber = item.GetField<int>("SEQUENCENUMBER");
 
-				if (add)
-				{
-					result.Add(records.ToDictionary());
-				}
+				// Step 1: Get a list of states that the records requires to be in
+				var states = sdk.CreateRecordset(
+					"M_WORKFLOWEVENTSTATES",
+					"FK_STATE",
+					$"FK_WORKFLOWEVENT = '{item.GetField<Guid>("PK_M_WORKFLOWEVENT")}'",
+					null
+				).AsEnumerable().Select(x => x.GetField<Guid>("FK_STATE")).ToList();
 
-				records.MoveNext();
+				if (states.Count > 0 && !states.Contains(tableRecordWorkflowState))
+					continue;
+
+				var systemVisibility = item.GetField<byte[]>("AVAILABILITY");
+				if (systemVisibility != default)
+					if (sdk.GetCalculatedColumnOutput(systemVisibility, table, recordID) is bool b)
+						if (b == false)
+							continue;
+
+				var customVisibility = item.GetField<byte[]>("USERAVAILABILITY");
+				if (customVisibility != default)
+					if (sdk.GetCalculatedColumnOutput(customVisibility, table, recordID) is bool b)
+						if (b == false)
+							continue;
+
+				var userVisibility = item.GetField<byte[]>("USERAVAILABILITY");
+				if (userVisibility != default)
+					if (sdk.GetCalculatedColumnOutput(userVisibility, table, recordID) is bool b)
+						if (b == false)
+							continue;
+
+				result.Add(add);
 			}
-
-			return result;
+			return result.OrderBy(x => x.SequenceNumber == 0)
+				.ThenBy(x => x.SequenceNumber)
+				.ThenBy(x => x.Name)
+				.ToList();
 		}
 
 		public static List<Dictionary<string, object>> RecordsTableWorkflows(

@@ -168,7 +168,7 @@ namespace RidderIQAPI.Controllers
 		/// <returns></returns>
 		[HttpGet()]
 		[Route("{table}/{recordID}/Workflows")]
-		[ResponseType(typeof(List<Dictionary<string, object>>))]
+		[ResponseType(typeof(List<RidderWorflowVisibility>))]
 		public IHttpActionResult RecordsGetWorkflows(
 			string table,
 			string recordID

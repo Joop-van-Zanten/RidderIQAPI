@@ -13,7 +13,7 @@ namespace RidderIQAPI
 		/// </summary>
 		[JsonProperty("type")]
 		[XmlAttribute]
-		public string Type { get; set; }
+		public RidderWorkflowParamaterType Type { get; set; }
 
 		/// <summary>
 		/// Workflow parameter Key

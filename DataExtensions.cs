@@ -12,6 +12,7 @@ using System.Xml;
 using Ridder.Common.ADO;
 using System.Collections.ObjectModel;
 using Ridder.Client.SDK.SDKDataAcces;
+using System.Diagnostics;
 
 namespace RidderIQAPI
 {
@@ -20,6 +21,7 @@ namespace RidderIQAPI
 		private const string randomChars = "abcdefghijklmonpqrstuvwqyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		private static readonly Random random = new Random();
 
+		[DebuggerStepThrough()]
 		public static string RandomString(this int length) => new string(Enumerable.Repeat(randomChars, length).Select(s => s[random.Next(s.Length)]).ToArray());
 
 		/// <summary>
@@ -27,8 +29,10 @@ namespace RidderIQAPI
 		/// </summary>
 		/// <param name="input">Input string to be checked</param>
 		/// <returns></returns>
+		[DebuggerStepThrough()]
 		public static bool IsBase64String(this string input) => (input.Trim().Length % 4 == 0) && Regex.IsMatch(input.Trim(), @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
 
+		[DebuggerStepThrough()]
 		public static HttpResponseMessage AddCoockie(this HttpResponseMessage response, CookieHeaderValue cookie)
 		{
 			response.Headers.AddCookies(new[] { cookie });
@@ -68,6 +72,7 @@ namespace RidderIQAPI
 		/// </summary>
 		/// <param name="encrypted">hashed string to be converted to text</param>
 		/// <returns></returns>
+		[DebuggerStepThrough()]
 		public static string OpenSSLDecrypt(this string encrypted)
 		{
 			try
@@ -82,6 +87,7 @@ namespace RidderIQAPI
 		/// </summary>
 		/// <param name="text">text to be converted to a hashed string</param>
 		/// <returns></returns>
+		[DebuggerStepThrough()]
 		public static string OpenSSLEncrypt(this string text)
 		{
 			try
@@ -156,6 +162,8 @@ namespace RidderIQAPI
 		{
 			try
 			{
+				if ((object)rec.GetField(key) == DBNull.Value)
+					return default;
 				var fieldValue = rec.GetField(key.ToUpper()).Value;
 				if (fieldValue is DBNull)
 					return default;
@@ -167,8 +175,10 @@ namespace RidderIQAPI
 			}
 		}
 
+		[DebuggerStepThrough()]
 		public static Collection<CookieHeaderValue> GetCookies(this HttpRequestMessage Request) => Request.Headers.GetCookies();
 
+		[DebuggerStepThrough()]
 		public static IEnumerable<SDKRecordset> AsEnumerable(this SDKRecordset records)
 		{
 			records.MoveFirst();
@@ -179,6 +189,7 @@ namespace RidderIQAPI
 			}
 		}
 
+		[DebuggerStepThrough()]
 		public static Dictionary<string, object> ToDictionary(this SDKRecordset records)
 		{
 			// Create the result

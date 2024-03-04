@@ -1,5 +1,8 @@
-﻿namespace RidderIQAPI.Models
+﻿using Newtonsoft.Json;
+
+namespace RidderIQAPI.Models
 {
+	[JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
 	public enum RidderDesignerScope
 	{
 		/// <summary>

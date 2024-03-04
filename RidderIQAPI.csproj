@@ -183,7 +183,9 @@
     <Compile Include="Models\RidderPermission\TableResult.cs" />
     <Compile Include="Models\RidderUserInfo.cs" />
     <Compile Include="Models\RidderSDKResult.cs" />
+    <Compile Include="Models\RidderWorflowVisibility.cs" />
     <Compile Include="Models\RidderWorkFlowEventParameter.cs" />
+    <Compile Include="Models\RidderWorkflowParamaterType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

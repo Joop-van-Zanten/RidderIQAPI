@@ -54,6 +54,7 @@ obj/
 bin/
 lib/
 packages/
+Properties/PublishProfiles
 
 # RidderIQAPI
 .crypt

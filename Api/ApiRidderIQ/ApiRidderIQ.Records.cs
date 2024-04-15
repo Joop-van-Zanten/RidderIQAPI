@@ -1,0 +1,616 @@
+﻿using ADODB;
+using Ridder.Client.SDK;
+using Ridder.Client.SDK.SDKDataAcces;
+using Ridder.Common.ADO;
+using RidderIQAPI.Models.RidderIQ;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.ServiceModel;
+
+namespace RidderIQAPI.Api.ApiRidderIQ
+{
+	internal static partial class ApiRidderIQ
+	{
+		public static int DocumentsAdd(
+			Collection<CookieHeaderValue> cookies,
+			RidderIQAddDocument add
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+			if (!File.Exists(add.File))
+				throw new FileNotFoundException(add.File);
+
+			// Find record in the DB, prevents duplicates
+			var doc = sdk.CreateRecordset(new QueryParameters(
+				"R_DOCUMENT",
+				"DOCUMENTLOCATION",
+				$"DOCUMENTLOCATION = '{add.File}'",
+				"DOCUMENTLOCATION",
+				1,
+				1
+			));
+
+			// Create result variable
+			int result;
+
+			if (doc.RecordCount == 1)
+			{
+				result = doc.GetField<int>("PK_R_DOCUMENT");
+
+				// Check if the document is not already assigned
+				string filter = $"{add.Table.Replace("R_", "FK_")} = {add.RecordID} AND FK_DOCUMENT = {result}";
+				SDKRecordset records = sdk.CreateRecordset($"{add.Table}DOCUMENT", null, filter, null);
+				if (records.RecordCount == 0)
+				{
+					// Create new record set with max 1 record
+					SDKRecordset createRecord = sdk.CreateRecordset(new QueryParameters($"{add.Table}DOCUMENT", pageSize: 1));
+					// Add new record
+					createRecord.AddNew();
+					// Add the required fields
+					List<string> fields = new List<string>();
+					foreach (Field f in createRecord.Fields)
+						fields.Add(f.Name);
+
+					string ForeignKey = $"FK_{add.Table}";
+					string ForeignKey2 = $"FK_{string.Join("_", add.Table.Split('_').Skip(1))}";
+
+					if (fields.Contains(ForeignKey))
+						createRecord.SetFieldValue(ForeignKey, add.RecordID);
+					else if (fields.Contains(ForeignKey2))
+						createRecord.SetFieldValue(ForeignKey2, add.RecordID);
+					else
+						throw new Exception("Unable to link document!");
+
+					createRecord.SetFieldValue("FK_DOCUMENT", add.RecordID);
+					// Apply Ridder DataChanges
+					createRecord.UseDataChanges = true;
+					// Update the record in order to create it
+					ISDKResult createResult = createRecord.Update();
+				}
+			}
+			else
+			{
+				// Create new file using the SDK
+				ISDKResult createResult = sdk.EventsAndActions.CRM.Actions.AddDocument(
+					add.File,
+					add.Revision,
+					add.SaveAsLocation,
+					add.Table,
+					add.RecordID,
+					add.Description
+				);
+
+				// Retrieve the PK
+				result = (int)createResult.PrimaryKey;
+			}
+
+			return result;
+		}
+
+		public static RidderIQRecords DocumentsGet(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string recordID,
+			string columns,
+			string filter,
+			string sort
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+
+			string pkfield = "FK_" + string.Join("_", table.Split('_').Skip(1));
+			// Find the Record by its ID
+			SDKRecordset records = sdk.CreateRecordset(
+				$"{table}DOCUMENT",
+				"FK_DOCUMENT",
+				$"{pkfield} = '{recordID}'",
+				null
+			);
+			// Check if any records are found
+			if (records.RecordCount == 0)
+				throw new KeyNotFoundException();
+			// Move the pointer to the start
+			records.MoveFirst();
+			List<int> pks = records.AsEnumerable().Select(x => (int)x.GetField("FK_DOCUMENT").Value).ToList();
+			string mainFilter = $"PK_R_DOCUMENT IN ({string.Join(", ", pks)})";
+			// Define the Query parameters
+			QueryParameters qp = new QueryParameters(
+				"R_DOCUMENT",
+				columns == null ? null : string.Join(",", columns.Split(',').Select(x => x.Trim()).OrderBy(x => x)),
+				filter != null ? $"{mainFilter} AND {filter}" : mainFilter,
+				sort == null ? null : string.Join(",", sort.Split(',').Select(x => x.Trim()).OrderBy(x => x))
+			);
+			// Execute the query
+			records = sdk.CreateRecordset(qp);
+			// Create result
+			RidderIQRecords result = new RidderIQRecords(qp)
+			{
+				Data = records.AsEnumerable().Select(x => x.ToDictionary()).ToList(),
+				Columns = qp.Columns,
+				Filter = filter,
+				Sort = qp.Sort
+			};
+			// Return the result
+			return result;
+		}
+
+		public static RidderIQSDKResult RecordsCreate(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string columns,
+			Dictionary<string, object> fields,
+			bool UseDataChanges = true
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+			// Create new empty record
+			var record = sdk.CreateRecordset(
+				table,
+				string.Join(",", fields.Keys),
+				$"PK_{table} = NULL",
+				null
+			);
+			// Move the pointer to the start
+			record.MoveFirst();
+			// Mark as new record
+			record.AddNew();
+			// Use datachanges
+			record.UseDataChanges = UseDataChanges;
+			// Loop through fields
+			foreach (var field in fields)
+				record.Fields[field.Key].Value = field.Value;
+
+			try
+			{
+				return new RidderIQSDKResult(record.Update());
+			}
+			catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+			{
+				return new RidderIQSDKResult(ex2);
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+		}
+
+		public static RidderIQSDKResult RecordsDelete(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string recordID
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+			// Find the Record by its ID
+			SDKRecordset records = sdk.CreateRecordset(
+				table,
+				$"PK_{table}",
+				$"PK_{table} = '{recordID}'",
+				null
+			);
+			// Check if any records are found
+			if (records.RecordCount == 0 || records.RecordCount > 1)
+				throw new KeyNotFoundException();
+
+			try
+			{
+				records.MoveFirst();
+				records.Delete();
+				return new RidderIQSDKResult(records.Update());
+			}
+			catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+			{
+				return new RidderIQSDKResult(ex2);
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+		}
+
+		public static RidderIQSDKResult RecordsExecuteWorkflows(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string recordID,
+			Guid workflowID,
+			List<RidderIQWorkFlowEventParameter> jsonParameters = null
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+
+			Dictionary<string, object> parameters = new Dictionary<string, object>();
+
+			if (jsonParameters != null && jsonParameters.Count > 0)
+			{
+				foreach (RidderIQWorkFlowEventParameter jsonParameter in jsonParameters)
+				{
+					switch (jsonParameter.Type)
+					{
+						case RidderIQWorkflowParamaterType.String:
+							parameters.Add(jsonParameter.Key, jsonParameter.Value.ToString().Trim());
+							break;
+
+						case RidderIQWorkflowParamaterType.Int:
+							parameters.Add(jsonParameter.Key, Convert.ToInt32(jsonParameter.Value));
+							break;
+
+						case RidderIQWorkflowParamaterType.Double:
+							parameters.Add(jsonParameter.Key, Convert.ToDouble(jsonParameter.Value));
+							break;
+
+						case RidderIQWorkflowParamaterType.Long:
+							parameters.Add(jsonParameter.Key, Convert.ToInt64(jsonParameter.Value));
+							break;
+
+						case RidderIQWorkflowParamaterType.DateTime:
+							parameters.Add(jsonParameter.Key, Convert.ToDateTime(jsonParameter.Value));
+							break;
+
+						default:
+							throw new NotImplementedException($"Type {jsonParameter.Type} is currently not implemented");
+					}
+				}
+			}
+
+			try
+			{
+				ISDKResult sdkResult = null;
+
+				if (parameters == null || parameters.Count == 0)
+					sdkResult = sdk.ExecuteWorkflowEvent(table, Convert.ToInt32(recordID), workflowID);
+				else
+					sdkResult = sdk.ExecuteWorkflowEvent(table, Convert.ToInt32(recordID), workflowID, parameters);
+				return new RidderIQSDKResult(sdkResult);
+			}
+			catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+			{
+				return new RidderIQSDKResult(ex2);
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+		}
+
+		public static RidderIQRecords RecordsGetList(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string columns,
+			string filter,
+			string sort,
+			int page = 1,
+			int pageSize = MaxPageSize
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+			// Define the Query parameters
+			QueryParameters qp = new QueryParameters(
+				table,
+				columns == null ? null : string.Join(",", columns.Split(',').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x)),
+				filter,
+				sort == null ? null : string.Join(",", sort.Split(',').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x)),
+				page >= 1 ? page : 1,
+				pageSize <= MaxPageSize ? pageSize : MaxPageSize
+			);
+			// Create recordset from the QueryParameters
+			var records = sdk.CreateRecordset(qp);
+			// Move the pointer to the start
+			records.MoveFirst();
+			// Create result
+			RidderIQRecords result = new RidderIQRecords(qp)
+			{
+				Data = records.AsEnumerable().Select(x => x.ToDictionary()).ToList(),
+				Columns = columns,
+				Filter = filter,
+				Sort = qp.Sort,
+				RecordCount = records.RecordCount
+			};
+			// Return the result
+			return result;
+		}
+
+		public static Dictionary<string, object> RecordsGetSingle(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string recordID,
+			string columns
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+			// Find the Record by its ID
+			SDKRecordset records = sdk.CreateRecordset(
+				table,
+				columns,
+				$"PK_{table} = '{recordID}'",
+				null
+			);
+			// Check if any records are found
+			if (records.RecordCount == 0)
+				throw new KeyNotFoundException();
+			// Move the pointer to the start
+			records.MoveFirst();
+			// Creat the result
+			Dictionary<string, object> result = records.ToDictionary();
+			// Return the result
+			return result;
+		}
+
+		public static List<Dictionary<string, object>> RecordsTableWorkflows(
+			Collection<CookieHeaderValue> cookies,
+			string table
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+
+			// Find the table
+			SDKRecordset records = sdk.CreateRecordset(
+				"M_TABLEINFO",
+				null,
+				$"TABLENAME = '{table}' AND FK_WORKFLOWMODEL IS NOT NULL",
+				null
+			);
+			// Check if any records are found
+			if (records.RecordCount == 0)
+				throw new KeyNotFoundException();
+			// Move the pointer to the start
+			records.MoveFirst();
+			// Get the workflow model
+			Guid workflowModel = (Guid)records.GetField("FK_WORKFLOWMODEL").Value;
+			records = sdk.CreateRecordset(
+				"M_WORKFLOWEVENT",
+				null,
+				$"FK_WORKFLOWMODEL = '{workflowModel}' AND (ACTIONNAME IS NULL OR ACTIONNAME = '') AND TYPE == 1",
+				null
+			);
+			// Check if any records are found
+			if (records.RecordCount == 0)
+				throw new KeyNotFoundException();
+			// Create result set
+			List<Dictionary<string, object>> result = records.AsEnumerable().Select(x => x.ToDictionary()).ToList();
+			// Return the result
+			return result;
+		}
+
+		public static RidderIQSDKResult RecordsUpdate(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string recordID,
+			Dictionary<string, object> data
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+			// Get record by ID
+			var record = sdk.CreateRecordset(
+				table,
+				null,
+				$"PK_{table} = '{recordID}'",
+				null
+			);
+			// Validate a record has been found
+			if (record.RecordCount == 0)
+				throw new KeyNotFoundException();
+
+			// Move the pointer to the start
+			record.MoveFirst();
+			// Use datachanges
+			record.UseDataChanges = true;
+			// Loop through update fields
+			foreach (KeyValuePair<string, object> field in data)
+			{
+				// Ignore PK if present
+				if (field.Key.StartsWith("PK_"))
+					continue;
+				// Update the field
+				record.Fields[field.Key].Value = field.Value;
+			}
+
+			try
+			{
+				// Update the record: Save
+				return new RidderIQSDKResult(record.Update());
+			}
+			catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+			{
+				return new RidderIQSDKResult(ex2);
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+		}
+
+		public static bool RecordsWorkflowsGetVisible(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string recordID,
+			Guid workflowID
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+
+			// Load the table record
+			SDKRecordset tableRecord = sdk.CreateRecordset($"{table}", null, $"PK_{table} = '{recordID}'", null);
+			tableRecord.MoveFirst();
+
+			// Get the current workflowstate of the table record
+			var tableRecordWorkflowState = tableRecord.GetField<Guid>("FK_WORKFLOWSTATE");
+
+			SDKRecordset workflowEvent = sdk.CreateRecordset(
+				"M_WORKFLOWEVENT",
+				null,
+				$"PK_M_WORKFLOWEVENT = '{workflowID}' AND TYPE != 3",
+				"SEQUENCENUMBER, NAME"
+			);
+			workflowEvent.MoveFirst();
+			// Check if any records are found
+			if (workflowEvent.RecordCount == 0)
+				throw new KeyNotFoundException();
+
+			List<RidderIQWorflowVisibility> result = new List<RidderIQWorflowVisibility>();
+
+			var hasPermission = CheckPermissionsWorkflows(
+				cookies,
+				new RidderIQPermissionWorkflowReqeust(
+					(RidderIQDesignerScope)workflowEvent.GetField<int>("SCOPE"),
+					workflowEvent.GetField<Guid>("PK_M_WORKFLOWEVENT")
+				)
+			).First().Result;
+
+			if (!hasPermission)
+				return false;
+
+			// Step 1: Get a list of states that the records requires to be in
+			var states = sdk.CreateRecordset(
+				"M_WORKFLOWEVENTSTATES",
+				"FK_STATE",
+				$"FK_WORKFLOWEVENT = '{workflowEvent.GetField<Guid>("PK_M_WORKFLOWEVENT")}'",
+				null
+			).AsEnumerable().Select(x => x.GetField<Guid>("FK_STATE")).ToList();
+
+			if (states.Count > 0 && !states.Contains(tableRecordWorkflowState))
+				return false;
+
+			var systemVisibility = workflowEvent.GetField<byte[]>("AVAILABILITY");
+			if (systemVisibility != default)
+				if (sdk.GetCalculatedColumnOutput(systemVisibility, table, recordID) is bool b)
+					if (b == false)
+						return false;
+
+			var customVisibility = workflowEvent.GetField<byte[]>("USERAVAILABILITY");
+			if (customVisibility != default)
+				if (sdk.GetCalculatedColumnOutput(customVisibility, table, recordID) is bool b)
+					if (b == false)
+						return false;
+
+			var userVisibility = workflowEvent.GetField<byte[]>("USERAVAILABILITY");
+			if (userVisibility != default)
+				if (sdk.GetCalculatedColumnOutput(userVisibility, table, recordID) is bool b)
+					if (b == false)
+						return false;
+
+			return true;
+		}
+
+		public static List<RidderIQWorflowVisibility> RecordsWorkflowsGetVisible(
+			Collection<CookieHeaderValue> cookies,
+			string table,
+			string recordID
+		)
+		{
+			// Get the SDK Client
+			RidderIQSDK sdk = GetClient(cookies, true);
+
+			// Load the table record
+			SDKRecordset tableRecord = sdk.CreateRecordset(
+				$"{table}",
+				null,
+				$"PK_{table} = '{recordID}'",
+				null
+			);
+			tableRecord.MoveFirst();
+			// Get the current workflowstate of the table record
+			var tableRecordWorkflowState = tableRecord.GetField<Guid>("FK_WORKFLOWSTATE");
+
+			// Find the table
+			SDKRecordset tableInfo = sdk.CreateRecordset(
+				"M_TABLEINFO",
+				null,
+				$"TABLENAME = '{table}' AND FK_WORKFLOWMODEL IS NOT NULL",
+				null
+			);
+			// Check if any records are found
+			if (tableInfo.RecordCount == 0)
+				throw new KeyNotFoundException();
+			// Move the pointer to the start
+			tableInfo.MoveFirst();
+			// Get the workflow model
+			Guid workflowModelID = tableInfo.GetField<Guid>("FK_WORKFLOWMODEL");
+
+			SDKRecordset workflowEvents = sdk.CreateRecordset(
+				"M_WORKFLOWEVENT",
+				null,
+				$"FK_WORKFLOWMODEL = '{workflowModelID}' AND TYPE != 3",
+				"SEQUENCENUMBER, NAME"
+			);
+			// Check if any records are found
+			if (workflowEvents.RecordCount == 0)
+				throw new KeyNotFoundException();
+
+			List<RidderIQWorflowVisibility> result = new List<RidderIQWorflowVisibility>();
+			foreach (SDKRecordset item in workflowEvents.AsEnumerable())
+			{
+				var hasPermission = CheckPermissionsWorkflows(
+					cookies,
+					new RidderIQPermissionWorkflowReqeust(
+						(RidderIQDesignerScope)item.GetField<int>("SCOPE"),
+						item.GetField<Guid>("PK_M_WORKFLOWEVENT")
+					)
+				).First().Result;
+				if (!hasPermission)
+					continue;
+
+				var wfScope = (RidderIQDesignerScope)item.GetField<int>("SCOPE");
+				var wfEvent = item.GetField<Guid>("PK_M_WORKFLOWEVENT");
+
+				RidderIQWorflowVisibility add = new RidderIQWorflowVisibility
+				{
+					Event = wfEvent,
+					Scope = wfScope,
+					Name = item.GetField<string>("NAME"),
+					Action = item.GetField<string>("ACTIONNAME"),
+					Caption = item.GetField<string>("CAPTION"),
+					SequenceNumber = item.GetField<int>("SEQUENCENUMBER")
+				};
+
+				// Step 1: Get a list of states that the records requires to be in
+				var states = sdk.CreateRecordset(
+					"M_WORKFLOWEVENTSTATES",
+					"FK_STATE",
+					$"FK_WORKFLOWEVENT = '{item.GetField<Guid>("PK_M_WORKFLOWEVENT")}'",
+					null
+				).AsEnumerable().Select(x => x.GetField<Guid>("FK_STATE")).ToList();
+
+				if (states.Count > 0 && !states.Contains(tableRecordWorkflowState))
+					continue;
+
+				var systemVisibility = item.GetField<byte[]>("AVAILABILITY");
+				if (systemVisibility != default)
+					if (sdk.GetCalculatedColumnOutput(systemVisibility, table, recordID) is bool b)
+						if (b == false)
+							continue;
+
+				var customVisibility = item.GetField<byte[]>("USERAVAILABILITY");
+				if (customVisibility != default)
+					if (sdk.GetCalculatedColumnOutput(customVisibility, table, recordID) is bool b)
+						if (b == false)
+							continue;
+
+				var userVisibility = item.GetField<byte[]>("USERAVAILABILITY");
+				if (userVisibility != default)
+					if (sdk.GetCalculatedColumnOutput(userVisibility, table, recordID) is bool b)
+						if (b == false)
+							continue;
+
+				result.Add(add);
+			}
+			return result.OrderBy(x => x.SequenceNumber == 0)
+				.ThenBy(x => x.SequenceNumber)
+				.ThenBy(x => x.Name)
+				.ToList();
+		}
+	}
+}

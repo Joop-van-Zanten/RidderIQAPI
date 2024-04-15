@@ -1,9 +1,9 @@
-﻿using System;
+﻿using RidderIQAPI.Models;
+using System;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Web.Http;
-using RidderIQAPI.Models;
 
 namespace RidderIQAPI.Controllers
 {
@@ -12,6 +12,11 @@ namespace RidderIQAPI.Controllers
 	/// </summary>
 	public class ApiBase : ApiController
 	{
+		/// <summary>
+		/// Execute an Action and return an ActionResult
+		/// </summary>
+		/// <param name="action"></param>
+		/// <returns></returns>
 		public IHttpActionResult Execute(Func<ActionResult, object> action)
 		{
 			try
@@ -42,6 +47,11 @@ namespace RidderIQAPI.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Execute an Action and return an ActionResult
+		/// </summary>
+		/// <param name="action"></param>
+		/// <returns></returns>
 		public IHttpActionResult Execute(Func<object> action)
 		{
 			try
@@ -62,15 +72,22 @@ namespace RidderIQAPI.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Action result
+		/// </summary>
 		public class ActionResult
 		{
+			/// <summary>
+			/// Action Cookies
+			/// </summary>
 			public List<CookieHeaderValue> Cookies = new List<CookieHeaderValue>();
 
-			public ActionResult Add(CookieHeaderValue cookie)
-			{
-				Cookies.Add(cookie);
-				return this;
-			}
+			/// <summary>
+			/// Add a cookie to the headers
+			/// </summary>
+			/// <param name="cookie"></param>
+			/// <returns></returns>
+			public void Add(CookieHeaderValue cookie) => Cookies.Add(cookie);
 		}
 	}
 }

@@ -44,6 +44,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ADODB, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -137,55 +139,59 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\ApiRidderIQ.cs" />
-    <Compile Include="Api\ApiRidderIQ.Records.cs" />
-    <Compile Include="Api\ApiRidderIQ.Anonymous.cs" />
-    <Compile Include="Api\ApiRidderIQ.User.cs" />
-    <Compile Include="Api\ApiRidderIQ.Permissions.cs.cs" />
-    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="Api\ApiRidderIQ\ApiRidderIQ.EventsAndActions.Stock.Actions.cs" />
+    <Compile Include="Api\ApiRidderIQ\ApiRidderIQ.EventsAndActions.Sales.Events.cs" />
+    <Compile Include="Api\ApiRidderIQ\ApiRidderIQ.cs" />
+    <Compile Include="Api\ApiRidderIQ\ApiRidderIQ.Records.cs" />
+    <Compile Include="Api\ApiRidderIQ\ApiRidderIQ.Anonymous.cs" />
+    <Compile Include="Api\ApiRidderIQ\ApiRidderIQ.User.cs" />
+    <Compile Include="Api\ApiRidderIQ\ApiRidderIQ.Permissions.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Attributes\SwaggerControllerNameAttribute.cs" />
     <Compile Include="Controllers\ApiBase.cs" />
-    <Compile Include="Controllers\ApiRidderPermissionController.cs" />
-    <Compile Include="Controllers\ApiRidderRecordsController.cs" />
-    <Compile Include="Controllers\ApiRidderUserController.cs" />
-    <Compile Include="Controllers\ApiRidderWorkflowController.cs" />
+    <Compile Include="Controllers\RidderIQ\RidderIQEventsAndActionsSalesController.cs" />
+    <Compile Include="Controllers\RidderIQ\RidderIQPermissionController.cs" />
+    <Compile Include="Controllers\RidderIQ\RidderIQRecordsController.cs" />
+    <Compile Include="Controllers\RidderIQ\RidderIQUserController.cs" />
     <Compile Include="Cryptography.cs" />
     <Compile Include="DataExtensions.cs" />
-    <Compile Include="Controllers\ApiRidderAnonymousController.cs" />
+    <Compile Include="Controllers\RidderIQ\RidderIQAnonymousController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="General.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\JsonApiException.cs" />
-    <Compile Include="Models\RidderCredential.cs" />
-    <Compile Include="Models\RidderCredentialToken.cs" />
-    <Compile Include="Models\RidderDesignerScope.cs" />
-    <Compile Include="Models\RidderLoginCompany.cs" />
-    <Compile Include="Models\RidderPermission\ActionReqeust.cs" />
-    <Compile Include="Models\RidderPermission\CustomResult.cs" />
-    <Compile Include="Models\RidderPermission\FormPartReqeust.cs" />
-    <Compile Include="Models\RidderPermission\FormPartResult.cs" />
-    <Compile Include="Models\RidderPermission\ReportReqeust.cs" />
-    <Compile Include="Models\RidderPermission\ReportResult.cs" />
-    <Compile Include="Models\RidderPermission\ScriptReqeust.cs" />
-    <Compile Include="Models\RidderPermission\ScriptResult.cs" />
-    <Compile Include="Models\RidderPermission\WorkflowReqeust.cs" />
-    <Compile Include="Models\RidderPermission\WorkflowResult.cs" />
-    <Compile Include="Models\RidderRecords.cs" />
-    <Compile Include="Models\RidderPermission\ColumnRequest.cs" />
-    <Compile Include="Models\RidderPermission\ColumnResult.cs" />
-    <Compile Include="Models\RidderPermission\ActionResult.cs" />
-    <Compile Include="Models\RidderPermission\TableResult.cs" />
-    <Compile Include="Models\RidderUserInfo.cs" />
-    <Compile Include="Models\RidderSDKResult.cs" />
-    <Compile Include="Models\RidderWorflowVisibility.cs" />
-    <Compile Include="Models\RidderWorkFlowEventParameter.cs" />
-    <Compile Include="Models\RidderWorkflowParamaterType.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQAddDocument.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQCreateShippingOrder.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQCreateShippingOrderRow.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQCredential.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQCredentialToken.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQDesignerScope.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQLoginCompany.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionActionReqeust.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionCustomResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionFormPartReqeust.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionFormPartResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionReportReqeust.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionReportResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionScriptReqeust.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionScriptResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionWorkflowReqeust.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionWorkflowResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQRecords.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionColumnRequest.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionColumnResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionActionResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQPermissionTableResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQSerialNumberInfo.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQUserInfo.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQSDKResult.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQWorflowVisibility.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQWorkFlowEventParameter.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQWorkflowParamaterType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +219,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Properties\PublishProfiles\RidderIQ.pubxml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

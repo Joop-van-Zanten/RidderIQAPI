@@ -1,22 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace RidderIQAPI.Attributes
 {
+	/// <summary>
+	/// Swagger Controller name attribute
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 	public class SwaggerControllerNameAttribute : Attribute
 	{
-		public string ControllerName { get; private set; }
+		/// <summary>
+		/// Get the controller name (Group)
+		/// </summary>
+		public string ControllerName { get; }
 
-		public SwaggerControllerNameAttribute(string ctrlrName)
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="name"></param>
+		/// <exception cref="ArgumentNullException"></exception>
+		public SwaggerControllerNameAttribute(string name)
 		{
-			if (string.IsNullOrEmpty(ctrlrName))
-			{
-				throw new ArgumentNullException("ctrlrName");
-			}
-			ControllerName = ctrlrName;
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentNullException(nameof(name));
+
+			ControllerName = name;
 		}
 	}
 }

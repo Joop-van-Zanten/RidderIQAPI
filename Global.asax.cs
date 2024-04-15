@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Web;
 using System.Web.Http;
@@ -12,21 +9,26 @@ using System.Web.Routing;
 
 namespace RidderIQAPI
 {
+	/// <summary>
+	/// IIS Web application
+	/// </summary>
 	public class WebApiApplication : System.Web.HttpApplication
 	{
+		/// <summary>
+		/// Start the application
+		/// </summary>
 		protected void Application_Start()
 		{
 			AreaRegistration.RegisterAllAreas();
 			GlobalConfiguration.Configure(WebApiConfig.Register);
 			FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
-			BundleConfig.RegisterBundles(BundleTable.Bundles);
 
 			if (!Cryptography.Initialised)
 			{
 				string cryptFile = HttpContext.Current.Server.MapPath(".crypt");
 				Dictionary<string, string> dic = null;
-				if (!File.Exists(cryptFile))
+				if (!File.Exists(cryptFile) || new FileInfo(cryptFile).Length == 0)
 				{
 					dic = new Dictionary<string, string>
 					{

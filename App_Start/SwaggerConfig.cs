@@ -4,8 +4,6 @@ using Swashbuckle.Swagger;
 using System.IO;
 using System.Linq;
 using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Description;
 using WebActivatorEx;
 
 [assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
@@ -274,12 +272,6 @@ namespace RidderIQAPI
 					//
 					//c.EnableApiKeySupport("apiKey", "header");
 				});
-		}
-
-		private static bool ResolveVersionSupportByRouteConstraint(ApiDescription apiDesc, string targetApiVersion)
-		{
-			var t = ((HttpActionDescriptor[])apiDesc.Route.DataTokens.First().Value).OfType<ReflectedHttpActionDescriptor>().First();
-			return true;
 		}
 
 		/// <summary>

@@ -1,4 +1,4 @@
-﻿using RidderIQAPI.Api.ApiRidderIQ;
+﻿using RidderIQAPI.Api;
 using RidderIQAPI.Attributes;
 using RidderIQAPI.Models.RidderIQ;
 using System;
@@ -12,7 +12,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 	/// <summary>
 	/// API User controller
 	/// </summary>
-	[SwaggerControllerName("Ridder/Records")]
+	[SwaggerControllerName("Records")]
 	[RoutePrefix("api/records")]
 	public class RidderIQRecordsController : ApiBase
 	{
@@ -34,7 +34,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			[Optional][DefaultParameterValue(true)] bool UseDataChanges
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsCreate(Request.GetCookies(), table, columns, fields, UseDataChanges));
+			return Execute(() => ApiRidderIQ.Records.Create(Request.GetCookies(), table, columns, fields, UseDataChanges));
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			string recordID
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsDelete(Request.GetCookies(), table, recordID));
+			return Execute(() => ApiRidderIQ.Records.Delete(Request.GetCookies(), table, recordID));
 		}
 
 		/// <summary>
@@ -61,10 +61,10 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		/// <returns></returns>
 		[HttpPost()]
 		[Route("{table}/{recordID}/Documents")]
-		[ResponseType(typeof(RidderIQRecords))]
+		[ResponseType(typeof(RidderIQSDKResult))]
 		public IHttpActionResult RecordsDocumentsAdd([FromBody] RidderIQAddDocument add)
 		{
-			return Execute(() => ApiRidderIQ.DocumentsAdd(Request.GetCookies(), add));
+			return Execute(() => ApiRidderIQ.Records.DocumentsAdd(Request.GetCookies(), add));
 		}
 
 		/// <summary>
@@ -87,7 +87,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			[Optional][DefaultParameterValue(null)] string sort
 		)
 		{
-			return Execute(() => ApiRidderIQ.DocumentsGet(Request.GetCookies(), table, recordID, columns, filter, sort));
+			return Execute(() => ApiRidderIQ.Records.DocumentsGet(Request.GetCookies(), table, recordID, columns, filter, sort));
 		}
 
 		/// <summary>
@@ -109,7 +109,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		)
 		{
 			return Execute(() =>
-				ApiRidderIQ.RecordsExecuteWorkflows(Request.GetCookies(), table, recordID, workflowID, parameters)
+				ApiRidderIQ.Records.ExecuteWorkflows(Request.GetCookies(), table, recordID, workflowID, parameters)
 			);
 		}
 
@@ -132,10 +132,10 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			[Optional][DefaultParameterValue(null)] string filter,
 			[Optional][DefaultParameterValue(null)] string sort,
 			[Optional][DefaultParameterValue(1)] int page,
-			[Optional][DefaultParameterValue(ApiRidderIQ.MaxPageSize)] int pageSize
+			[Optional][DefaultParameterValue(ApiRidderIQ.Core.MaxPageSize)] int pageSize
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsGetList(Request.GetCookies(), table, columns, filter, sort, page, pageSize));
+			return Execute(() => ApiRidderIQ.Records.GetList(Request.GetCookies(), table, columns, filter, sort, page, pageSize));
 		}
 
 		/// <summary>
@@ -152,7 +152,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			string recordID
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsGetRecordTag(Request.GetCookies(), table, recordID));
+			return Execute(() => ApiRidderIQ.Records.GetRecordTag(Request.GetCookies(), table, recordID));
 		}
 
 		/// <summary>
@@ -171,7 +171,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			[Optional][DefaultParameterValue(null)] string columns
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsGetSingle(Request.GetCookies(), table, recordID, columns));
+			return Execute(() => ApiRidderIQ.Records.GetSingle(Request.GetCookies(), table, recordID, columns));
 		}
 
 		/// <summary>
@@ -188,7 +188,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			string recordID
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsGetWorkflows(Request.GetCookies(), table, recordID));
+			return Execute(() => ApiRidderIQ.Records.GetWorkflows(Request.GetCookies(), table, recordID));
 		}
 
 		/// <summary>
@@ -207,7 +207,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			Guid workflowID
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsWorkflowsGetVisible(Request.GetCookies(), table, recordID, workflowID));
+			return Execute(() => ApiRidderIQ.Records.WorkflowsGetVisible(Request.GetCookies(), table, recordID, workflowID));
 		}
 
 		/// <summary>
@@ -222,7 +222,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			string table
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsTableWorkflows(Request.GetCookies(), table));
+			return Execute(() => ApiRidderIQ.Records.TableWorkflows(Request.GetCookies(), table));
 		}
 
 		/// <summary>
@@ -241,7 +241,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			Dictionary<string, object> data
 		)
 		{
-			return Execute(() => ApiRidderIQ.RecordsUpdate(Request.GetCookies(), table, recordID, data));
+			return Execute(() => ApiRidderIQ.Records.Update(Request.GetCookies(), table, recordID, data));
 		}
 	}
 }

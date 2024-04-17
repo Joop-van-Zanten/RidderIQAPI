@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
-using System.Web.Optimization;
 using System.Web.Routing;
 
 namespace RidderIQAPI
@@ -12,7 +14,7 @@ namespace RidderIQAPI
 	/// <summary>
 	/// IIS Web application
 	/// </summary>
-	public class WebApiApplication : System.Web.HttpApplication
+	public class WebApiApplication : HttpApplication
 	{
 		/// <summary>
 		/// Start the application
@@ -23,6 +25,18 @@ namespace RidderIQAPI
 			GlobalConfiguration.Configure(WebApiConfig.Register);
 			FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
+
+			// Add the Json Serializer to the HttpConfiguration object
+			GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings = new JsonSerializerSettings
+			{
+				// Ignore the Self Reference looping
+				ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+				// Do not Preserve the Reference Handling
+				PreserveReferencesHandling = PreserveReferencesHandling.None, 
+			};
+
+			// This line ensures Json for all clients, without this line it generates Json only for clients which request, for browsers default is XML
+			GlobalConfiguration.Configuration.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
 
 			if (!Cryptography.Initialised)
 			{

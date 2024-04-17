@@ -1,4 +1,4 @@
-﻿using RidderIQAPI.Api.ApiRidderIQ;
+﻿using RidderIQAPI.Api;
 using RidderIQAPI.Attributes;
 using RidderIQAPI.Models.RidderIQ;
 using System;
@@ -12,7 +12,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 	/// <summary>
 	/// API Permissions controller
 	/// </summary>
-	[SwaggerControllerName("Ridder/Permissions")]
+	[SwaggerControllerName("Permissions")]
 	[RoutePrefix("api/permissions")]
 	public class RidderIQPermissionController : ApiBase
 	{
@@ -26,7 +26,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Action/{scope}/{actionName}")]
 		[ResponseType(typeof(RidderIQPermissionActionResult))]
-		public IHttpActionResult CheckPermissionAction(RidderIQDesignerScope scope, string actionName) => Execute(() => ApiRidderIQ.CheckPermissionActions(Request.GetCookies(), new RidderIQPermissionActionReqeust(scope, actionName)).FirstOrDefault());
+		public IHttpActionResult CheckPermissionAction(RidderIQDesignerScope scope, string actionName) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionActions(Request.GetCookies(), new RidderIQPermissionActionReqeust(scope, actionName)).FirstOrDefault());
 
 		/// <summary>
 		/// Check Permission: Action (Multiple)
@@ -37,7 +37,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpPost()]
 		[Route("Action")]
 		[ResponseType(typeof(IEnumerable<RidderIQPermissionActionResult>))]
-		public IHttpActionResult CheckPermissionAction([FromBody] RidderIQPermissionActionReqeust[] checks) => Execute(() => ApiRidderIQ.CheckPermissionActions(Request.GetCookies(), checks));
+		public IHttpActionResult CheckPermissionAction([FromBody] RidderIQPermissionActionReqeust[] checks) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionActions(Request.GetCookies(), checks));
 
 		/// <summary>
 		/// Check Permission: Column
@@ -49,7 +49,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Column/{tableName}/{columnName}")]
 		[ResponseType(typeof(RidderIQPermissionColumnResult))]
-		public IHttpActionResult CheckPermissionColumn(string tableName, string columnName) => Execute(() => ApiRidderIQ.CheckPermissionsColumns(Request.GetCookies(), new RidderIQPermissionColumnRequest(tableName, columnName)).FirstOrDefault());
+		public IHttpActionResult CheckPermissionColumn(string tableName, string columnName) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionsColumns(Request.GetCookies(), new RidderIQPermissionColumnRequest(tableName, columnName)).FirstOrDefault());
 
 		/// <summary>
 		/// Check Permission: Column (Multiple)
@@ -60,7 +60,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpPost()]
 		[Route("Column")]
 		[ResponseType(typeof(IEnumerable<RidderIQPermissionColumnResult>))]
-		public IHttpActionResult CheckPermissionColumn([FromBody] RidderIQPermissionColumnRequest[] checks) => Execute(() => ApiRidderIQ.CheckPermissionsColumns(Request.GetCookies(), checks));
+		public IHttpActionResult CheckPermissionColumn([FromBody] RidderIQPermissionColumnRequest[] checks) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionsColumns(Request.GetCookies(), checks));
 
 		/// <summary>
 		/// Check Permission: Custom Permission
@@ -71,7 +71,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Custompermission/{customPermissionId}")]
 		[ResponseType(typeof(RidderIQPermissionCustomResult))]
-		public IHttpActionResult CheckPermissionCustomPermission(Guid customPermissionId) => Execute(() => ApiRidderIQ.CheckPermissionCustomPermission(Request.GetCookies(), customPermissionId).FirstOrDefault());
+		public IHttpActionResult CheckPermissionCustomPermission(Guid customPermissionId) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionCustomPermission(Request.GetCookies(), customPermissionId).FirstOrDefault());
 
 		/// <summary>
 		/// Check Permission: Custom Permission (Multiple)
@@ -82,7 +82,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpPost()]
 		[Route("Custompermission/")]
 		[ResponseType(typeof(IEnumerable<RidderIQPermissionCustomResult>))]
-		public IHttpActionResult CheckPermissionCustomPermission([FromBody] Guid[] checks) => Execute(() => ApiRidderIQ.CheckPermissionCustomPermission(Request.GetCookies(), checks));
+		public IHttpActionResult CheckPermissionCustomPermission([FromBody] Guid[] checks) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionCustomPermission(Request.GetCookies(), checks));
 
 		/// <summary>
 		/// Check Permission: FormPart
@@ -94,7 +94,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Formpart/{scope}/{formPartName}")]
 		[ResponseType(typeof(RidderIQPermissionFormPartResult))]
-		public IHttpActionResult CheckPermissionFormPart(RidderIQDesignerScope scope, string formPartName) => Execute(() => ApiRidderIQ.CheckPermissionFormPart(Request.GetCookies(), new RidderIQPermissionFormPartReqeust(scope, formPartName)).FirstOrDefault());
+		public IHttpActionResult CheckPermissionFormPart(RidderIQDesignerScope scope, string formPartName) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionFormPart(Request.GetCookies(), new RidderIQPermissionFormPartReqeust(scope, formPartName)).FirstOrDefault());
 
 		/// <summary>
 		/// Check Permission: FormPart (Multiple)
@@ -105,7 +105,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpPost()]
 		[Route("Formpart")]
 		[ResponseType(typeof(IEnumerable<RidderIQPermissionFormPartResult>))]
-		public IHttpActionResult CheckPermissionFormPart([FromBody] RidderIQPermissionFormPartReqeust[] checks) => Execute(() => ApiRidderIQ.CheckPermissionFormPart(Request.GetCookies(), checks));
+		public IHttpActionResult CheckPermissionFormPart([FromBody] RidderIQPermissionFormPartReqeust[] checks) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionFormPart(Request.GetCookies(), checks));
 
 		/// <summary>
 		/// Check Permission: Report
@@ -117,7 +117,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Report/{scope}/{reportId}")]
 		[ResponseType(typeof(RidderIQPermissionReportResult))]
-		public IHttpActionResult CheckPermissionReport(RidderIQDesignerScope scope, Guid reportId) => Execute(() => ApiRidderIQ.CheckPermissionReport(Request.GetCookies(), new RidderIQPermissionReportReqeust(scope, reportId)));
+		public IHttpActionResult CheckPermissionReport(RidderIQDesignerScope scope, Guid reportId) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionReport(Request.GetCookies(), new RidderIQPermissionReportReqeust(scope, reportId)));
 
 		/// <summary>
 		/// Check Permission: Report (Multiple)
@@ -128,7 +128,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpPost()]
 		[Route("Report")]
 		[ResponseType(typeof(IEnumerable<RidderIQPermissionReportResult>))]
-		public IHttpActionResult CheckPermissionReport([FromBody] RidderIQPermissionReportReqeust[] checks) => Execute(() => ApiRidderIQ.CheckPermissionReport(Request.GetCookies(), checks));
+		public IHttpActionResult CheckPermissionReport([FromBody] RidderIQPermissionReportReqeust[] checks) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionReport(Request.GetCookies(), checks));
 
 		/// <summary>
 		/// Check Permission: Script
@@ -140,7 +140,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Script/{scope}/{name}")]
 		[ResponseType(typeof(RidderIQPermissionScriptResult))]
-		public IHttpActionResult CheckPermissionScript(RidderIQDesignerScope scope, string name) => Execute(() => ApiRidderIQ.CheckPermissionScript(Request.GetCookies(), new RidderIQPermissionScriptReqeust(scope, name)));
+		public IHttpActionResult CheckPermissionScript(RidderIQDesignerScope scope, string name) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionScript(Request.GetCookies(), new RidderIQPermissionScriptReqeust(scope, name)));
 
 		/// <summary>
 		/// Check Permission: Script (Multiple)
@@ -151,7 +151,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpPost()]
 		[Route("Script")]
 		[ResponseType(typeof(IEnumerable<RidderIQPermissionScriptResult>))]
-		public IHttpActionResult CheckPermissionScript([FromBody] RidderIQPermissionScriptReqeust[] checks) => Execute(() => ApiRidderIQ.CheckPermissionScript(Request.GetCookies(), checks));
+		public IHttpActionResult CheckPermissionScript([FromBody] RidderIQPermissionScriptReqeust[] checks) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionScript(Request.GetCookies(), checks));
 
 		/// <summary>
 		/// Check Permission: Table
@@ -162,7 +162,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Table/{tableName}")]
 		[ResponseType(typeof(RidderIQPermissionTableResult))]
-		public IHttpActionResult CheckPermissionTable(string tableName) => Execute(() => ApiRidderIQ.CheckPermissionsTable(Request.GetCookies(), tableName).FirstOrDefault());
+		public IHttpActionResult CheckPermissionTable(string tableName) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionsTable(Request.GetCookies(), tableName).FirstOrDefault());
 
 		/// <summary>
 		/// Check Permission: Tables (Multiple)
@@ -173,7 +173,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpPost()]
 		[Route("Table")]
 		[ResponseType(typeof(IEnumerable<RidderIQPermissionTableResult>))]
-		public IHttpActionResult CheckPermissionTable([FromBody] string[] checks) => Execute(() => ApiRidderIQ.CheckPermissionsTable(Request.GetCookies(), checks));
+		public IHttpActionResult CheckPermissionTable([FromBody] string[] checks) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionsTable(Request.GetCookies(), checks));
 
 		/// <summary>
 		/// Check Permission: Workflow
@@ -185,7 +185,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Workflow/{scope}/{workflowEventId}")]
 		[ResponseType(typeof(RidderIQPermissionWorkflowResult))]
-		public IHttpActionResult CheckPermissionWorkflow(RidderIQDesignerScope scope, Guid workflowEventId) => Execute(() => ApiRidderIQ.CheckPermissionsWorkflows(Request.GetCookies(), new RidderIQPermissionWorkflowReqeust(scope, workflowEventId)).FirstOrDefault());
+		public IHttpActionResult CheckPermissionWorkflow(RidderIQDesignerScope scope, Guid workflowEventId) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionsWorkflows(Request.GetCookies(), new RidderIQPermissionWorkflowReqeust(scope, workflowEventId)).FirstOrDefault());
 
 		/// <summary>
 		/// Check Permission: Workflow (Multiple)
@@ -196,6 +196,6 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpPost()]
 		[Route("Workflow")]
 		[ResponseType(typeof(IEnumerable<RidderIQPermissionWorkflowResult>))]
-		public IHttpActionResult CheckPermissionWorkflow([FromBody] RidderIQPermissionWorkflowReqeust[] checks) => Execute(() => ApiRidderIQ.CheckPermissionsWorkflows(Request.GetCookies(), checks));
+		public IHttpActionResult CheckPermissionWorkflow([FromBody] RidderIQPermissionWorkflowReqeust[] checks) => Execute(() => ApiRidderIQ.Permissions.CheckPermissionsWorkflows(Request.GetCookies(), checks));
 	}
 }

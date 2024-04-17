@@ -1,6 +1,6 @@
 ﻿using Ridder.Client.SDK.SDKDataAcces;
 using Ridder.Common.ADO;
-using RidderIQAPI.Api.ApiRidderIQ;
+using RidderIQAPI.Api;
 using RidderIQAPI.Models.RidderIQ;
 using System;
 using System.Collections.Generic;
@@ -67,13 +67,15 @@ namespace RidderIQAPI
 		/// <param name="json"></param>
 		/// <param name="code"></param>
 		/// <returns></returns>
-		[DebuggerStepThrough]
+		//[DebuggerStepThrough]
 		public static HttpResponseMessage CreateJsonResponse(this ApiController c, object json, System.Net.HttpStatusCode code = System.Net.HttpStatusCode.OK)
 		{
 			// Create response
 			var response = c.Request.CreateResponse(code, json);
+
 			// Set response media to JSON
 			response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
 			// Build cookies
 			List<CookieHeaderValue> cookieHeaders = new List<CookieHeaderValue>();
 			foreach (CookieHeaderValue cookieHeader in c.Request.Headers.GetCookies())
@@ -84,10 +86,10 @@ namespace RidderIQAPI
 					// Get the value
 					string cookieValue = cookie.Value;
 					// Check for a specific name
-					if (cookie.Name == ApiRidderIQ.CookieIqToken)
+					if (cookie.Name == ApiRidderIQ.Core.CookieIqToken)
 					{
 						// Get the SDK Credentials
-						RidderIQCredential client = ApiRidderIQ.GetIqCredential(c.Request.Headers.GetCookies());
+						RidderIQCredential client = ApiRidderIQ.Core.GetIqCredential(c.Request.Headers.GetCookies());
 						if (client != null)
 							// Override the value with a new serialized value
 							cookieValue = client.SerializeJSON().OpenSSLEncrypt();
@@ -193,7 +195,7 @@ namespace RidderIQAPI
 		/// </summary>
 		/// <param name="encrypted">hashed string to be converted to text</param>
 		/// <returns></returns>
-		[DebuggerStepThrough]
+		//[DebuggerStepThrough]
 		public static string OpenSSLDecrypt(this string encrypted)
 		{
 			try

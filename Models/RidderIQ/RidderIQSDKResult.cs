@@ -9,6 +9,12 @@ namespace RidderIQAPI.Models.RidderIQ
 	/// </summary>
 	public class RidderIQSDKResult
 	{
+		public RidderIQSDKResult(bool hasError, object primaryKey)
+		{
+			HasError = hasError;
+			PrimaryKey = primaryKey;
+		}
+
 		/// <summary>
 		/// Constructor using the SDK result
 		/// </summary>

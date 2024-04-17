@@ -6,12 +6,21 @@ using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 using System.ServiceModel;
 
-namespace RidderIQAPI.Api.ApiRidderIQ
+namespace RidderIQAPI.Api
 {
+	/// <summary>
+	/// Ridder IQ API handler
+	/// </summary>
 	internal static partial class ApiRidderIQ
 	{
+		/// <summary>
+		/// Ridder EventsAndActions handlers
+		/// </summary>
 		internal static partial class EventsAndActions
 		{
+			/// <summary>
+			/// Ridder SalesEvents handler
+			/// </summary>
 			internal static partial class SalesEvents
 			{
 				internal static RidderIQSDKResult CreateShippingOrderFromOrderFromSelectedDetails(
@@ -20,7 +29,7 @@ namespace RidderIQAPI.Api.ApiRidderIQ
 				)
 				{
 					// Get the SDK Client
-					RidderIQSDK sdk = GetClient(cookies, true);
+					RidderIQSDK sdk = Core.GetClient(cookies, true);
 
 					CreateShippingOrderParameter SdkShippingOrder = new CreateShippingOrderParameter();
 

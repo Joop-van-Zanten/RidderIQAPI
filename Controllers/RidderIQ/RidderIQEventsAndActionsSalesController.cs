@@ -1,4 +1,4 @@
-﻿using RidderIQAPI.Api.ApiRidderIQ;
+﻿using RidderIQAPI.Api;
 using RidderIQAPI.Attributes;
 using RidderIQAPI.Models.RidderIQ;
 using System.Web.Http;
@@ -9,7 +9,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 	/// <summary>
 	/// API Actions and Events Sales controller
 	/// </summary>
-	[SwaggerControllerName("Ridder/EventsAndActions/Sales/Event")]
+	[SwaggerControllerName("EventsAndActions/Sales/Event")]
 	[RoutePrefix("api/EventsAndActions/Sales/Events")]
 	public class RidderIQEventsAndActionsSalesController : ApiBase
 	{

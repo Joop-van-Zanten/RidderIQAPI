@@ -120,7 +120,6 @@ namespace RidderIQAPI
 					// Xml comments (http://msdn.microsoft.com/en-us/library/b2s063f7(v=vs.110).aspx), you can incorporate
 					// those comments into the generated docs and UI. You can enable this by providing the path to one or
 					// more Xml comment files.
-					//
 					var filePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "bin", "RidderIQAPI.xml");
 					c.IncludeXmlComments(filePath);
 

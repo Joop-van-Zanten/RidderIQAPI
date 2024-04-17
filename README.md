@@ -6,4 +6,4 @@ Requirements:
 
 <h2>Records API endpoints</h2>
 
-![plot](Images/ApiRecordsPage.png?raw=true "Title")
+![plot](Images/ApiEndpoints.png?raw=true "Title")

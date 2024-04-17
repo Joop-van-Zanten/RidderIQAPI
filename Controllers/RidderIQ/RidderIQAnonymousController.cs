@@ -1,4 +1,4 @@
-﻿using RidderIQAPI.Api.ApiRidderIQ;
+﻿using RidderIQAPI.Api;
 using RidderIQAPI.Attributes;
 using RidderIQAPI.Models.RidderIQ;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 	/// <summary>
 	/// API Anonymous controller
 	/// </summary>
-	[SwaggerControllerName("Ridder/Anonymous")]
+	[SwaggerControllerName("Anonymous")]
 	[RoutePrefix("api/anonymous")]
 	public class RidderIQAnonymousController : ApiBase
 	{
@@ -23,7 +23,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[ResponseType(typeof(List<RidderIQLoginCompany>))]
 		public IHttpActionResult GetCompanys()
 		{
-			return Execute(() => ApiRidderIQ.GetCompanys());
+			return Execute(() => ApiRidderIQ.Anonymous.GetCompanys());
 		}
 
 		/// <summary>
@@ -39,7 +39,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 			// Arguments checks
 			if (string.IsNullOrWhiteSpace(company))
 				return BadRequest();
-			return Execute(() => ApiRidderIQ.GetCompanysUsers(company));
+			return Execute(() => ApiRidderIQ.Anonymous.GetCompanysUsers(company));
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[ResponseType(typeof(Dictionary<string, List<string>>))]
 		public IHttpActionResult LoggedInUsers()
 		{
-			return Execute(() => ApiRidderIQ.LoggedInUsers());
+			return Execute(() => ApiRidderIQ.Anonymous.LoggedInUsers());
 		}
 
 		/// <summary>
@@ -64,7 +64,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[ApiExplorerSettings(IgnoreApi = true)]
 		public IHttpActionResult LogoutEverybodyForced()
 		{
-			return Execute(() => ApiRidderIQ.LogoutEverybodyForced());
+			return Execute(() => ApiRidderIQ.Anonymous.LogoutEverybodyForced());
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using RidderIQAPI.Api.ApiRidderIQ;
+﻿using RidderIQAPI.Api;
 using RidderIQAPI.Attributes;
 using RidderIQAPI.Models.RidderIQ;
 using System.Web.Http;
@@ -9,7 +9,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 	/// <summary>
 	/// API User controller
 	/// </summary>
-	[SwaggerControllerName("Ridder/User")]
+	[SwaggerControllerName("User")]
 	[RoutePrefix("api/user")]
 	public class RidderIQUserController : ApiBase
 	{
@@ -20,7 +20,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("")]
 		[ResponseType(typeof(RidderIQUserInfo))]
-		public IHttpActionResult GetUser() => Execute(() => ApiRidderIQ.GetUser(Request.GetCookies()));
+		public IHttpActionResult GetUser() => Execute(() => ApiRidderIQ.User.GetUser(Request.GetCookies()));
 
 		/// <summary>
 		/// Logged in status
@@ -29,7 +29,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Loggedin")]
 		[ResponseType(typeof(bool))]
-		public IHttpActionResult LoggedIn() => Execute(() => ApiRidderIQ.LoggedIn(Request.GetCookies()));
+		public IHttpActionResult LoggedIn(bool validateCookieWithSession = true) => Execute(() => ApiRidderIQ.User.LoggedIn(Request.GetCookies(), validateCookieWithSession));
 
 		/// <summary>
 		/// Login
@@ -43,7 +43,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		{
 			return Execute((ActionResult ar) =>
 			{
-				ar.Add(ApiRidderIQ.Login(Request.GetCookies(), user));
+				ar.Add(ApiRidderIQ.User.Login(Request.GetCookies(), user));
 				return true;
 			});
 		}
@@ -59,7 +59,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		{
 			return Execute((ActionResult ar) =>
 			{
-				ar.Add(ApiRidderIQ.Logout(Request.GetCookies()));
+				ar.Add(ApiRidderIQ.User.Logout(Request.GetCookies()));
 				return true;
 			});
 		}

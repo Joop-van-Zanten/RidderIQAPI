@@ -9,9 +9,9 @@ namespace RidderIQAPI.Controllers.RidderIQ
 	/// <summary>
 	/// API Actions and Events Sales controller
 	/// </summary>
-	[SwaggerControllerName("EventsAndActions/Sales/Event")]
-	[RoutePrefix("api/EventsAndActions/Sales/Events")]
-	public class RidderIQEventsAndActionsSalesController : ApiBase
+	[SwaggerControllerName("Sales/Event")]
+	[RoutePrefix("api/Sales/Events")]
+	public class RidderIQSalesEventsController : ApiBase
 	{
 		/// <summary>
 		/// Create shipping order from selected details
@@ -25,7 +25,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		{
 			return Execute((ActionResult ar) =>
 			{
-				return ApiRidderIQ.EventsAndActions.SalesEvents.CreateShippingOrderFromOrderFromSelectedDetails(Request.GetCookies(), obj);
+				return ApiRidderIQ.SalesEvents.CreateShippingOrderFromOrderFromSelectedDetails(Request.GetCookies(), obj);
 			});
 		}
 	}

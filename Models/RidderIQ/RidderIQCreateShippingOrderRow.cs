@@ -1,6 +1,7 @@
 ﻿using Ridder.Client.SDK.SDKParameters;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace RidderIQAPI.Models.RidderIQ
 {
@@ -17,11 +18,13 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// <summary>
 		/// PK (All detail)
 		/// </summary>
+		[Required]
 		public Guid ID { get; set; }
 
 		/// <summary>
 		/// Quantity
 		/// </summary>
+		[Required]
 		public double Quantity { get; set; }
 
 		/// <summary>
@@ -42,7 +45,7 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// <summary>
 		/// Is the delivery completed
 		/// </summary>
-		public bool DeliveryComplete { get; set; }
+		internal bool DeliveryComplete { get; set; }
 
 		/// <summary>
 		/// Delivery date of the backorder
@@ -52,7 +55,8 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// <summary>
 		/// Remaining quantity to deliver
 		/// </summary>
-		public double RemainingQuantity { get; set; }
+		//[Required]
+		internal double RemainingQuantity { get; set; }
 
 		/// <summary>
 		/// Convert the API model back to SDK model

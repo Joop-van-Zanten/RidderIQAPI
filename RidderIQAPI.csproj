@@ -140,8 +140,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\ApiRidderIQ.EventsAndActions.Stock.Actions.cs" />
-    <Compile Include="Api\ApiRidderIQ.EventsAndActions.Sales.Events.cs" />
+    <Compile Include="Api\ApiRidderIQ.Stock.Actions.cs" />
+    <Compile Include="Api\ApiRidderIQ.Sales.Events.cs" />
     <Compile Include="Api\ApiRidderIQ.cs" />
     <Compile Include="Api\ApiRidderIQ.Records.cs" />
     <Compile Include="Api\ApiRidderIQ.Anonymous.cs" />
@@ -153,8 +153,8 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Attributes\SwaggerControllerNameAttribute.cs" />
     <Compile Include="Controllers\ApiBase.cs" />
-    <Compile Include="Controllers\RidderIQ\RidderIQEventsAndActionsStockEventsController.cs" />
-    <Compile Include="Controllers\RidderIQ\RidderIQEventsAndActionsSalesController.cs" />
+    <Compile Include="Controllers\RidderIQ\RidderIQStockEventsController.cs" />
+    <Compile Include="Controllers\RidderIQ\RidderIQSalesEventsController.cs" />
     <Compile Include="Controllers\RidderIQ\RidderIQPermissionController.cs" />
     <Compile Include="Controllers\RidderIQ\RidderIQRecordsController.cs" />
     <Compile Include="Controllers\RidderIQ\RidderIQUserController.cs" />
@@ -171,8 +171,10 @@
     <Compile Include="Models\RidderIQ\RidderIQCreateShippingOrderRow.cs" />
     <Compile Include="Models\RidderIQ\RidderIQCredential.cs" />
     <Compile Include="Models\RidderIQ\RidderIQCredentialToken.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQDeliveryDateType.cs" />
     <Compile Include="Models\RidderIQ\RidderIQDesignerScope.cs" />
     <Compile Include="Models\RidderIQ\RidderIQLoginCompany.cs" />
+    <Compile Include="Models\RidderIQ\RidderIQOrderFromOfferParameters.cs" />
     <Compile Include="Models\RidderIQ\RidderIQPermissionActionReqeust.cs" />
     <Compile Include="Models\RidderIQ\RidderIQPermissionCustomResult.cs" />
     <Compile Include="Models\RidderIQ\RidderIQPermissionFormPartReqeust.cs" />

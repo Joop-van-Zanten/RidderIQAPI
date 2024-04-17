@@ -10,7 +10,7 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// <summary>
 		/// Serial number ID
 		/// </summary>
-		public int SerialNumberId { get; set; }
+		public int SerialNumberID { get; set; }
 
 		/// <summary>
 		/// Number
@@ -19,7 +19,7 @@ namespace RidderIQAPI.Models.RidderIQ
 
 		internal SerialNumberInfo ConvertToSDK() => new SerialNumberInfo
 		{
-			SerialNumberId = SerialNumberId,
+			SerialNumberId = SerialNumberID,
 			Number = Number
 		};
 	}

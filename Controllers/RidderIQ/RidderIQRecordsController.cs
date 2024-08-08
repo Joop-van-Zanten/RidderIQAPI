@@ -137,7 +137,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		)
 		{
 			return Execute(() =>
-				ApiRidderIQ.Records.ExecuteWorkflows(Request.GetCookies(), table, recordID, workflowID, parameters)
+				ApiRidderIQ.Records.ExecuteWorkflow(Request.GetCookies(), table, recordID, workflowID, parameters)
 			);
 		}
 

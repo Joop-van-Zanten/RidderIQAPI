@@ -63,7 +63,7 @@ namespace RidderIQAPI.Api
 				}
 				catch (FaultException<TranslationMessageInfo> ex)
 				{
-					return new RidderIQSDKResult(ex);
+					return new RidderIQSDKResult(ex, null);
 				}
 				catch
 				{

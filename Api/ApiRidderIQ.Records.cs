@@ -53,9 +53,9 @@ namespace RidderIQAPI.Api
 				{
 					return new RidderIQSDKResult(record.Update());
 				}
-				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex)
 				{
-					return new RidderIQSDKResult(ex2);
+					return new RidderIQSDKResult(ex, null);
 				}
 				catch (Exception)
 				{
@@ -88,9 +88,9 @@ namespace RidderIQAPI.Api
 					records.Delete();
 					return new RidderIQSDKResult(records.Update());
 				}
-				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex)
 				{
-					return new RidderIQSDKResult(ex2);
+					return new RidderIQSDKResult(ex, recordID);
 				}
 				catch (Exception)
 				{
@@ -173,9 +173,9 @@ namespace RidderIQAPI.Api
 						return new RidderIQSDKResult(createResult);
 					}
 				}
-				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex)
 				{
-					return new RidderIQSDKResult(ex2);
+					return new RidderIQSDKResult(ex, null);
 				}
 				catch (Exception)
 				{
@@ -231,7 +231,7 @@ namespace RidderIQAPI.Api
 				return result;
 			}
 
-			public static RidderIQSDKResult ExecuteWorkflows(
+			public static RidderIQSDKResult ExecuteWorkflow(
 				Collection<CookieHeaderValue> cookies,
 				string table,
 				string recordID,
@@ -284,11 +284,12 @@ namespace RidderIQAPI.Api
 						sdkResult = sdk.ExecuteWorkflowEvent(table, Convert.ToInt32(recordID), workflowID);
 					else
 						sdkResult = sdk.ExecuteWorkflowEvent(table, Convert.ToInt32(recordID), workflowID, parameters);
-					return new RidderIQSDKResult(sdkResult);
+
+					return new RidderIQSDKResult(sdkResult, recordID);
 				}
-				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex)
 				{
-					return new RidderIQSDKResult(ex2);
+					return new RidderIQSDKResult(ex, recordID);
 				}
 				catch (Exception)
 				{
@@ -598,9 +599,9 @@ namespace RidderIQAPI.Api
 					// Update the record: Save
 					return new RidderIQSDKResult(record.Update());
 				}
-				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex2)
+				catch (FaultException<Ridder.Common.TranslationMessageInfo> ex)
 				{
-					return new RidderIQSDKResult(ex2);
+					return new RidderIQSDKResult(ex, recordID);
 				}
 				catch (Exception)
 				{

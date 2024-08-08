@@ -67,7 +67,7 @@ namespace RidderIQAPI
 		/// <param name="json"></param>
 		/// <param name="code"></param>
 		/// <returns></returns>
-		//[DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public static HttpResponseMessage CreateJsonResponse(this ApiController c, object json, System.Net.HttpStatusCode code = System.Net.HttpStatusCode.OK)
 		{
 			// Create response
@@ -195,7 +195,7 @@ namespace RidderIQAPI
 		/// </summary>
 		/// <param name="encrypted">hashed string to be converted to text</param>
 		/// <returns></returns>
-		//[DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public static string OpenSSLDecrypt(this string encrypted)
 		{
 			try
@@ -279,7 +279,7 @@ namespace RidderIQAPI
 		/// </summary>
 		/// <param name="records"></param>
 		/// <returns></returns>
-		//[DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public static Dictionary<string, object> ToDictionary(this SDKRecordset records)
 		{
 			string tablename = null;

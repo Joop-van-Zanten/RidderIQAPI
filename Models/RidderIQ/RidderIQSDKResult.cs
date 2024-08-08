@@ -24,11 +24,15 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// Constructor using the SDK result
 		/// </summary>
 		/// <param name="result"></param>
-		public RidderIQSDKResult(Ridder.Client.SDK.ISDKResult result)
+		/// <param name="primaryKey">Give PK as Ridder does not always return PK itself</param>
+		public RidderIQSDKResult(Ridder.Client.SDK.ISDKResult result, object primaryKey = null)
 		{
 			HasError = result.HasError;
 			PrimaryKey = result?.PrimaryKey;
 			PrimaryKeys = result?.PrimaryKeys;
+			if (PrimaryKey == null && primaryKey != null)
+				PrimaryKey = primaryKey;
+
 			if (result.Messages != null)
 			{
 				Messages = new List<ResultMessage>();
@@ -46,16 +50,20 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// Constructor using an Exception
 		/// </summary>
 		/// <param name="ex2"></param>
-		public RidderIQSDKResult(FaultException<TranslationMessageInfo> ex2)
+		/// <param name="primaryKey">Give PK as Ridder does not always return PK itself</param>
+		public RidderIQSDKResult(FaultException<TranslationMessageInfo> ex2, object primaryKey)
 		{
 			HasError = true;
 			ResultString = ex2.Message;
+
 			Messages = new List<ResultMessage>()
 			{
 				{
 					new ResultMessage(MessageTypes.Error, ex2.Message)
 				}
 			};
+
+			PrimaryKey = primaryKey;
 		}
 
 		/// <summary>

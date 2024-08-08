@@ -22,31 +22,23 @@ namespace RidderIQAPI.Api
 			/// <returns></returns>
 			public static List<RidderIQLoginCompany> GetCompanys()
 			{
-				try
-				{
-					return Core.RidderSDK
-						.GetAdministrations()
-						.Select(x => new RidderIQLoginCompany()
-						{
-							CompanyAliases = x.CompanyAliases.ToList(),
-							CompanyName = x.CompanyName,
-							CompanyNumber = x.CompanyNumber,
-							DatabaseName = x.DatabaseName,
-							Users = x.Users
-									.Select(y => y.UserName)
-									.Where(y => !string.Equals("ADMINISTRATOR", y, StringComparison.InvariantCultureIgnoreCase))
-									.OrderBy(y => y)
-									.ToList(),
-							Version = x.Version,
-						})
-						.OrderBy(x => x.DatabaseName)
-						.ToList();
-				}
-				catch
-				{
-					throw;
-					return default;
-				}
+				return Core.RidderSDK
+					.GetAdministrations()
+					.Select(x => new RidderIQLoginCompany()
+					{
+						CompanyAliases = x.CompanyAliases.ToList(),
+						CompanyName = x.CompanyName,
+						CompanyNumber = x.CompanyNumber,
+						DatabaseName = x.DatabaseName,
+						Users = x.Users
+								.Select(y => y.UserName)
+								.Where(y => !string.Equals("ADMINISTRATOR", y, StringComparison.InvariantCultureIgnoreCase))
+								.OrderBy(y => y)
+								.ToList(),
+						Version = x.Version,
+					})
+					.OrderBy(x => x.DatabaseName)
+					.ToList();
 			}
 
 			/// <summary>

@@ -3,6 +3,10 @@ using RidderIQAPI.Attributes;
 using RidderIQAPI.Models.RidderIQ;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -17,10 +21,35 @@ namespace RidderIQAPI.Controllers.RidderIQ
 	public class RidderIQRecordsController : ApiBase
 	{
 		/// <summary>
+		/// Show a document
+		/// </summary>
+		/// <param name="file">File</param>
+		/// <returns></returns>
+		[HttpGet()]
+		[Route("Documents/{file}/")]
+		public HttpResponseMessage RecordsShowDocument(
+			string file
+		)
+		{
+			//var docRecord = ApiRidderIQ.Records.GetSingle(Request.GetCookies(), "R_DOCUMENT", documentID.ToString(), null);
+			string docFile = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(file));
+			if (File.Exists(docFile))
+			{
+				HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
+				FileStream fileStream = File.OpenRead(docFile);
+				response.Content = new StreamContent(fileStream);
+				response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+
+				return response;
+			}
+
+			return default;
+		}
+
+		/// <summary>
 		/// Create record
 		/// </summary>
 		/// <param name="table">Table name</param>
-		/// <param name="columns">Columns to be returns, null/empty for all columns</param>
 		/// <param name="fields">values to be updated</param>
 		/// <param name="UseDataChanges">Use Datachanges</param>
 		/// <returns></returns>
@@ -29,12 +58,11 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[ResponseType(typeof(RidderIQSDKResult))]
 		public IHttpActionResult RecordsCreate(
 			string table,
-			string columns,
 			Dictionary<string, object> fields,
 			[Optional][DefaultParameterValue(true)] bool UseDataChanges
 		)
 		{
-			return Execute(() => ApiRidderIQ.Records.Create(Request.GetCookies(), table, columns, fields, UseDataChanges));
+			return Execute(() => ApiRidderIQ.Records.Create(Request.GetCookies(), table, fields, UseDataChanges));
 		}
 
 		/// <summary>

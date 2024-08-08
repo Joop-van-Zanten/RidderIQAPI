@@ -29,7 +29,7 @@ namespace RidderIQAPI.Controllers.RidderIQ
 		[HttpGet()]
 		[Route("Loggedin")]
 		[ResponseType(typeof(bool))]
-		public IHttpActionResult LoggedIn(bool validateCookieWithSession = true) => Execute(() => ApiRidderIQ.User.LoggedIn(Request.GetCookies(), validateCookieWithSession));
+		public IHttpActionResult LoggedIn() => Execute(() => ApiRidderIQ.User.LoggedIn(Request.GetCookies()));
 
 		/// <summary>
 		/// Login

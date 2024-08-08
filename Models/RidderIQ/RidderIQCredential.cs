@@ -32,17 +32,6 @@ namespace RidderIQAPI.Models.RidderIQ
 		public string Password { get; set; }
 
 		/// <summary>
-		/// TimeStamp for cookie value change
-		/// </summary>
-		[JsonProperty("TimeStamp")]
-		[XmlAttribute]
-		public DateTime TimeStamp
-		{
-			get => DateTime.Now;
-			set { }
-		}
-
-		/// <summary>
 		/// Check if an object equals another
 		/// </summary>
 		/// <param name="other"></param>

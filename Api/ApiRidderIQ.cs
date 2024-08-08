@@ -1,5 +1,4 @@
 ﻿using Ridder.Client.SDK;
-using Ridder.Client.SDK.SDKDataAcces;
 using RidderIQAPI.Models.RidderIQ;
 using System;
 using System.Collections.Generic;

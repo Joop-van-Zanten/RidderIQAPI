@@ -9,6 +9,11 @@ namespace RidderIQAPI.Models.RidderIQ
 	/// </summary>
 	public class RidderIQSDKResult
 	{
+		/// <summary>
+		/// Create new Ridder IQ SDK result
+		/// </summary>
+		/// <param name="hasError">Error present?</param>
+		/// <param name="primaryKey">Primary key of the record</param>
 		public RidderIQSDKResult(bool hasError, object primaryKey)
 		{
 			HasError = hasError;

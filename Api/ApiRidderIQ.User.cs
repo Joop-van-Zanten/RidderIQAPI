@@ -40,6 +40,26 @@ namespace RidderIQAPI.Api
 					result.EmployeeData = employee.ToDictionary();
 				}
 
+				try
+				{
+					var rolesIDs = sdk.CreateRecordset("C_ROLEUSER", "FK_ROLE", $"FK_USER = {result.CurrentUserId}", null)
+						.AsEnumerable()
+						.Select(x => x.GetField<int>("FK_ROLE"));
+
+					if (rolesIDs.Count() > 0)
+					{
+						result.Roles.AddRange(
+							sdk.CreateRecordset("R_ROLE", "NAME", $"PK_R_ROLE IN ({string.Join(",", rolesIDs)})", "NAME ASC")
+								.AsEnumerable()
+								.Select(x => x.GetField<string>("NAME"))
+								.OrderBy(x => x)
+						);
+					}
+				}
+				catch
+				{
+				}
+
 				// Return the result
 				return result;
 			}
@@ -48,9 +68,8 @@ namespace RidderIQAPI.Api
 			/// Logged in status
 			/// </summary>
 			/// <param name="cookies">Cookies for getting the SDK Session</param>
-			/// <param name="validateCookieWithSession">Validate the client userinfo with the cookie credentials</param>
 			/// <returns></returns>
-			public static bool LoggedIn(Collection<CookieHeaderValue> cookies, bool validateCookieWithSession)
+			public static bool LoggedIn(Collection<CookieHeaderValue> cookies)
 			{
 				// Get the SDK Client
 				RidderIQSDK sdk = Core.GetClient(cookies);
@@ -62,7 +81,7 @@ namespace RidderIQAPI.Api
 					result = sdk.LoggedinAndConnected;
 				}
 
-				if (result && validateCookieWithSession)
+				if (result)
 				{
 					var cred = Core.GetIqCredential(cookies);
 					var user = sdk.GetUserInfo();
@@ -71,7 +90,10 @@ namespace RidderIQAPI.Api
 						cred.Username != user.CurrentUserName ||
 						cred.Company != user.CompanyName
 					)
+					{
+						sdk.Logout();
 						result = false;
+					}
 				}
 
 				return result;

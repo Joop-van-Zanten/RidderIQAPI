@@ -61,11 +61,19 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// <summary>
 		/// Get the Employee linked data (R_EMPLOYEE)
 		/// </summary>
+		[JsonProperty("EmployeeData")]
 		public Dictionary<string, object> EmployeeData { get; set; } = new Dictionary<string, object>();
 
 		/// <summary>
 		/// Get the user data (R_USER)
 		/// </summary>
+		[JsonProperty("UserData")]
 		public Dictionary<string, object> UserData { get; set; } = new Dictionary<string, object>();
+
+		/// <summary>
+		/// Get assigned role names
+		/// </summary>
+		[JsonProperty("Roles")]
+		public List<string> Roles { get; set; } = new List<string>();
 	}
 }

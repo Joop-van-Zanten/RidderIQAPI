@@ -26,7 +26,6 @@ namespace RidderIQAPI.Api
 			public static RidderIQSDKResult Create(
 				Collection<CookieHeaderValue> cookies,
 				string table,
-				string columns,
 				Dictionary<string, object> fields,
 				bool UseDataChanges = true
 			)
@@ -36,7 +35,7 @@ namespace RidderIQAPI.Api
 				// Create new empty record
 				var record = sdk.CreateRecordset(
 					table,
-					string.Join(",", fields.Keys),
+					null,
 					$"PK_{table} = NULL",
 					null
 				);
@@ -309,15 +308,17 @@ namespace RidderIQAPI.Api
 			{
 				// Get the SDK Client
 				RidderIQSDK sdk = Core.GetClient(cookies, true);
+
 				// Define the Query parameters
 				QueryParameters qp = new QueryParameters(
-					table,
-					columns == null ? null : string.Join(",", columns.Split(',').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x)),
-					filter,
-					sort == null ? null : string.Join(",", sort.Split(',').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x)),
+					table?.ToUpper(),
+					(columns == null ? null : string.Join(",", columns.Split(',').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x)))?.ToUpper(),
+					filter?.ToUpper(),
+					(sort == null ? null : string.Join(",", sort.Split(',').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x)))?.ToUpper(),
 					page >= 1 ? page : 1,
 					pageSize <= Core.MaxPageSize ? pageSize : Core.MaxPageSize
 				);
+
 				// Create recordset from the QueryParameters
 				var records = sdk.CreateRecordset(qp);
 				// Move the pointer to the start
@@ -329,8 +330,28 @@ namespace RidderIQAPI.Api
 					Columns = columns,
 					Filter = filter,
 					Sort = qp.Sort,
-					RecordCount = records.RecordCount
+					RecordCount = records.RecordCount,
+					Page = qp.Page
 				};
+				// Check if a next page is available (one more record than input given)
+				if (result.Data.Count >= qp.Page)
+				{
+					// Find next record
+					// Set single column
+					qp.Columns = $"PK_{qp.TableName}";
+					// Calculate page, given a single pagesize must be returned
+					qp.Page = (qp.Page * qp.PageSize) + 1;
+					// Set the pageSize tot 1: Single record
+					qp.PageSize = 1;
+					// Check if a next record is present
+					if (sdk.CreateRecordset(qp).RecordCount > 0)
+						// Set flag for hase more
+						result.HaseMore = true;
+				}
+
+				// Verify columns
+				VerifyColumns(result);
+
 				// Return the result
 				return result;
 			}
@@ -365,10 +386,27 @@ namespace RidderIQAPI.Api
 				// Check if any records are found
 				if (records.RecordCount == 0)
 					throw new KeyNotFoundException();
+
 				// Move the pointer to the start
 				records.MoveFirst();
+
 				// Creat the result
 				Dictionary<string, object> result = records.ToDictionary();
+
+				// Verify columns
+				VerifyColumns(result, columns);
+
+				if (!string.IsNullOrWhiteSpace(columns))
+				{
+					List<string> keyNotPresent = columns
+						.Split(',')
+						.Where(x => !result.ContainsKey(x))
+						.ToList();
+
+					if (keyNotPresent.Count > 0)
+						throw new Exception($"Onvoldoende lees rechten op {table}: {string.Join(", ", keyNotPresent)}");
+				}
+
 				// Return the result
 				return result;
 			}
@@ -750,6 +788,30 @@ namespace RidderIQAPI.Api
 					.ThenBy(x => x.Name)
 					.ToList();
 			}
+		}
+
+		private static void VerifyColumns(RidderIQRecords result) => VerifyColumns(result?.Data?.First(), result?.Columns);
+
+		private static void VerifyColumns(Dictionary<string, object> data, string columns)
+		{
+			if (
+				data == null ||
+				columns == null
+			)
+				return;
+
+			List<string> keyNotPresent = columns
+				.Split(',')
+				.Where(x => !string.IsNullOrEmpty(x))
+				.Select(x => x.Trim())
+				.Where(x => !data.ContainsKey(x))
+				.ToList();
+
+			if (keyNotPresent.Count == 0)
+				return;
+
+			string table = data.Keys.First(x => x.StartsWith("PK_")).Remove(0, 3);
+			throw new Exception($"Onvoldoende lees rechten op {table}: {string.Join(", ", keyNotPresent)}");
 		}
 	}
 }

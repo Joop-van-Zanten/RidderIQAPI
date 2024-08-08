@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http.Headers;
@@ -32,7 +31,7 @@ namespace RidderIQAPI
 				// Ignore the Self Reference looping
 				ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
 				// Do not Preserve the Reference Handling
-				PreserveReferencesHandling = PreserveReferencesHandling.None, 
+				PreserveReferencesHandling = PreserveReferencesHandling.None,
 			};
 
 			// This line ensures Json for all clients, without this line it generates Json only for clients which request, for browsers default is XML

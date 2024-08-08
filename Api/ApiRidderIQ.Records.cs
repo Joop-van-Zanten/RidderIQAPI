@@ -346,7 +346,7 @@ namespace RidderIQAPI.Api
 					// Check if a next record is present
 					if (sdk.CreateRecordset(qp).RecordCount > 0)
 						// Set flag for hase more
-						result.HaseMore = true;
+						result.HasMore = true;
 				}
 
 				// Verify columns

@@ -198,7 +198,7 @@ namespace RidderIQAPI.Api
 				string pkfield = "FK_" + string.Join("_", table.Split('_').Skip(1));
 				// Find the Record by its ID
 				SDKRecordset records = sdk.CreateRecordset(
-					$"{table}DOCUMENT",
+					$"{table}DOCUMENT".ToUpper(),
 					"FK_DOCUMENT",
 					$"{pkfield} = '{recordID}'",
 					null
@@ -378,8 +378,8 @@ namespace RidderIQAPI.Api
 				RidderIQSDK sdk = Core.GetClient(cookies, true);
 				// Find the Record by its ID
 				SDKRecordset records = sdk.CreateRecordset(
-					table,
-					columns,
+					table?.ToUpper(),
+					columns?.ToUpper(),
 					$"PK_{table} = '{recordID}'",
 					null
 				);

@@ -279,15 +279,26 @@ namespace RidderIQAPI
 		/// </summary>
 		/// <param name="records"></param>
 		/// <returns></returns>
-		[DebuggerStepThrough]
+		//[DebuggerStepThrough]
 		public static Dictionary<string, object> ToDictionary(this SDKRecordset records)
 		{
+			string tablename = null;
+			string fkr = null;
+
 			// Create the result
 			Dictionary<string, object> result = new Dictionary<string, object>();
 
 			List<string> keys = new List<string>();
 			foreach (ADODB.Field item in records.Fields)
-				keys.Add(item.Name);
+			{
+				string key = item.Name.ToUpper();
+				if (key.StartsWith("PK_"))
+				{
+					tablename = key.Remove(0, 3);
+					fkr = $"FK_{tablename}".ToUpper();
+				}
+				keys.Add(key);
+			}
 
 			// Find the primary key, set it as the first item
 			var pk = keys.FirstOrDefault(x => x.StartsWith("PK_", StringComparison.InvariantCultureIgnoreCase));
@@ -297,6 +308,9 @@ namespace RidderIQAPI
 			// Loop through all remaining keys orderred by the key
 			foreach (var key in keys.Where(x => !x.StartsWith("PK_", StringComparison.InvariantCultureIgnoreCase)).OrderBy(x => x))
 			{
+				if (key == fkr)
+					continue;
+
 				// Add the field to the result
 				result.Add(key, records.GetField(key).Value);
 			}

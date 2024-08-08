@@ -47,7 +47,7 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// <summary>
 		/// Has more: a next page is available given the recordcount
 		/// </summary>
-		public bool HaseMore { get; set; }
+		public bool HasMore { get; set; }
 
 		/// <summary>
 		/// Current Page

@@ -401,6 +401,7 @@ namespace RidderIQAPI.Api
 				{
 					List<string> keyNotPresent = columns
 						.Split(',')
+						.Select(x => x.Trim())
 						.Where(x => !result.ContainsKey(x))
 						.ToList();
 
@@ -791,7 +792,7 @@ namespace RidderIQAPI.Api
 			}
 		}
 
-		private static void VerifyColumns(RidderIQRecords result) => VerifyColumns(result?.Data?.First(), result?.Columns);
+		private static void VerifyColumns(RidderIQRecords result) => VerifyColumns(result?.Data?.FirstOrDefault(), result?.Columns);
 
 		private static void VerifyColumns(Dictionary<string, object> data, string columns)
 		{

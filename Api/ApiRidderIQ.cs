@@ -36,7 +36,8 @@ namespace RidderIQAPI.Api
 
 			internal static readonly RidderIQSDK RidderSDK = new RidderIQSDK();
 
-			internal static readonly List<RidderIQCredentialToken> SdkClients = new List<RidderIQCredentialToken>();
+			private static readonly List<RidderIQCredentialToken> sdkClients = new List<RidderIQCredentialToken>();
+			internal static List<RidderIQCredentialToken> SdkClients => sdkClients.Where(x => x != null).ToList();
 
 			internal static RidderIQSDK GetClient(Collection<CookieHeaderValue> cookies, bool throwException = false)
 			{
@@ -82,8 +83,8 @@ namespace RidderIQAPI.Api
 
 			internal static void Register(RidderIQCredentialToken token)
 			{
-				if (!SdkClients.Any(x => x.Equals(token)))
-					SdkClients.Add(token);
+				if (!sdkClients.Any(x => x.Equals(token)))
+					sdkClients.Add(token);
 			}
 
 			internal static void UnRegister(Collection<CookieHeaderValue> cookies)
@@ -91,15 +92,18 @@ namespace RidderIQAPI.Api
 				RidderIQCredential cred = GetIqCredential(cookies);
 				if (cred is null)
 					return;
-				RidderIQCredentialToken item = SdkClients.FirstOrDefault(x => x.Person == cred);
+				RidderIQCredentialToken item = sdkClients.FirstOrDefault(x => x.Person == cred);
 				if (item != null)
 				{
-					item.Dispose();
-					SdkClients.Remove(item);
+					lock (sdkClients)
+					{
+						item.Dispose();
+						sdkClients.Remove(item);
+					}
 				}
 			}
 
-			private static RidderIQSDK GetClient(RidderIQCredential cred) => SdkClients.FirstOrDefault(x => x.Person == cred)?.Sdk;
+			private static RidderIQSDK GetClient(RidderIQCredential cred) => sdkClients.Where(x => x != null).FirstOrDefault(x => x.Person == cred)?.Sdk;
 
 			internal static RidderIQCredential GetIqCredential(Collection<CookieHeaderValue> cookies)
 			{

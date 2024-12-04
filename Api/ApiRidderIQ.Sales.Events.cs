@@ -46,7 +46,6 @@ namespace RidderIQAPI.Api
 					RidderIQCreateShippingOrderRow line = apiShippingOrder.Rows.FirstOrDefault(x => x.ID == saleOrderId);
 
 					line.RemainingQuantity = RemainingQuantity;
-					line.DeliveryComplete = line.Quantity >= line.RemainingQuantity;
 				});
 
 				CreateShippingOrderParameter SdkShippingOrder = new CreateShippingOrderParameter();

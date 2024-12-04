@@ -1,4 +1,5 @@
 ﻿using Ridder.Client.SDK;
+using Ridder.Common.ADO;
 using RidderIQAPI.Models.RidderIQ;
 using System;
 using System.Collections.ObjectModel;
@@ -60,6 +61,24 @@ namespace RidderIQAPI.Api
 				{
 				}
 
+				// Query active work activity
+				try
+				{
+					var a = sdk.CreateRecordset(new QueryParameters(
+						"R_REGISTEREDTIME",
+						"FK_WORKACTIVITY",
+						$"FK_EMPLOYEE = {result.UserData["FK_EMPLOYEE"]}",
+						"START DESC",
+						1,
+						1
+					));
+					a.MoveFirst();
+					result.ActiveWorkActivity = a.GetField<int>("FK_WORKACTIVITY");
+				}
+				catch (Exception)
+				{
+				}
+
 				// Return the result
 				return result;
 			}
@@ -115,10 +134,15 @@ namespace RidderIQAPI.Api
 					// Create new SDK client
 					RidderIQSDK sdk = new RidderIQSDK();
 					// Try to 're-use' existing Ridder SDK connection
-					ISDKResult loginResult = sdk.ConnectToPersistedSession(person.Username, person.Password, person.Company);
+					ISDKResult loginResult = null;
+					try
+					{
+						loginResult = sdk.ConnectToPersistedSession(person.Username, person.Password, person.Company);
+					}
+					catch { }
 
 					// Check if the user is succesfully LoggedIn using Persisted
-					if (loginResult != null && loginResult.HasError)
+					if (loginResult == null || (loginResult != null && loginResult.HasError))
 					{
 						// Try to create new connection using the credentials
 						loginResult = sdk.Login(person.Username, person.Password, person.Company);

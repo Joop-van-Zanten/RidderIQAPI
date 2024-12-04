@@ -75,5 +75,11 @@ namespace RidderIQAPI.Models.RidderIQ
 		/// </summary>
 		[JsonProperty("Roles")]
 		public List<string> Roles { get; set; } = new List<string>();
+
+		/// <summary>
+		/// Active Work Activity
+		/// </summary>
+		[JsonProperty("ActiveWorkActivity")]
+		public int ActiveWorkActivity { get; set; }
 	}
 }

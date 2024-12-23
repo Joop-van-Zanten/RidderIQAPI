@@ -80,7 +80,7 @@ namespace RidderIQAPI.Api
 					.OrderBy(x => x.Key)
 					.ToDictionary(
 						k => k.Key,
-						v => v.Select(y => y.Person.Company).OrderBy(x => x).ToList()
+						v => v.Select(y => y.Person.Company).Distinct().OrderBy(x => x).ToList()
 					);
 			}
 

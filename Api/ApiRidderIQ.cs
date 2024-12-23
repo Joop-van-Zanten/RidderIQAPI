@@ -1,4 +1,5 @@
-﻿using Ridder.Client.SDK;
+﻿using Microsoft.Ajax.Utilities;
+using Ridder.Client.SDK;
 using RidderIQAPI.Models.RidderIQ;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Web;
+using System.Web.UI.WebControls;
 
 namespace RidderIQAPI.Api
 {
@@ -36,8 +38,8 @@ namespace RidderIQAPI.Api
 
 			internal static readonly RidderIQSDK RidderSDK = new RidderIQSDK();
 
-			private static readonly List<RidderIQCredentialToken> sdkClients = new List<RidderIQCredentialToken>();
-			internal static List<RidderIQCredentialToken> SdkClients => sdkClients.Where(x => x != null).ToList();
+			private static readonly List<RidderIQCredentialToken> _sdkClients = new List<RidderIQCredentialToken>();
+			internal static List<RidderIQCredentialToken> SdkClients => _sdkClients.Where(x => x != null).ToList();
 
 			internal static RidderIQSDK GetClient(Collection<CookieHeaderValue> cookies, bool throwException = false)
 			{
@@ -83,8 +85,9 @@ namespace RidderIQAPI.Api
 
 			internal static void Register(RidderIQCredentialToken token)
 			{
-				if (!sdkClients.Any(x => x.Equals(token)))
-					sdkClients.Add(token);
+				lock (_sdkClients)
+					if (!_sdkClients.Any(x => x.Equals(token)))
+						_sdkClients.Add(token);
 			}
 
 			internal static void UnRegister(Collection<CookieHeaderValue> cookies)
@@ -92,18 +95,29 @@ namespace RidderIQAPI.Api
 				RidderIQCredential cred = GetIqCredential(cookies);
 				if (cred is null)
 					return;
-				RidderIQCredentialToken item = sdkClients.FirstOrDefault(x => x.Person == cred);
+				RidderIQCredentialToken item = _sdkClients.FirstOrDefault(x => x.Person == cred);
 				if (item != null)
 				{
-					lock (sdkClients)
+					lock (_sdkClients)
 					{
 						item.Dispose();
-						sdkClients.Remove(item);
+						_sdkClients.Remove(item);
 					}
 				}
 			}
 
-			private static RidderIQSDK GetClient(RidderIQCredential cred) => sdkClients.Where(x => x != null).FirstOrDefault(x => x.Person == cred)?.Sdk;
+			private static RidderIQSDK GetClient(RidderIQCredential cred)
+			{
+				// Remove Null values
+				while (_sdkClients.Any(x => x == null))
+					_sdkClients.Remove(null);
+
+				// Remove duplicates
+				while (_sdkClients.Where(x => x.Person.Equals(cred)).Count() > 1)
+					_sdkClients.Remove(_sdkClients.First(x => x.Person.Equals(cred)));
+
+				return _sdkClients.Where(x => x != null).FirstOrDefault(x => x.Person == cred)?.Sdk;
+			}
 
 			internal static RidderIQCredential GetIqCredential(Collection<CookieHeaderValue> cookies)
 			{
